@@ -91,7 +91,7 @@ const loadResults = async () => {
 
 const getHtml = async (id) => {
     try {
-        document.getElementById('loadxml').innerText = 'Loading ' + id;
+        document.getElementById('loadxml').innerHTML = `Loading ${id}<div class="progress"><div class="indeterminate"></div></div>`;
         const url = `https://gs-service-production.geodab.eu/gs-service/services/essi/csw?service=CSW&version=2.0.2&request=GetRecordById&id=${id}&outputschema=http://www.isotc211.org/2005/gmi&elementSetName=full`;
         const response = await fetch(url);
         const xml = await response.text();
