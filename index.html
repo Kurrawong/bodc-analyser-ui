@@ -33,7 +33,35 @@
                 <span class="pre-label">xml</span>
                 <code id="xml-output" class="xml"></code>
             </pre>
-            <button class="btn">Analyse metadata</button>
+            <div class="row card">
+                <form class="card-content col s12">
+                    <div class="row">
+                        <div class="card-title">Analyser</div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s8">
+                            <input placeholder="Enter URI" id="endpoint" type="text" class="validate">
+                            <label for="endpoint">Analyser Endpoint</label>
+                        </div>
+                        <div class="input-field col s2">
+                            <select id="threshold">
+                            <option value="" disabled selected>Select</option>
+                            <option value="1">1</option>
+                            <option value="0.9">0.9</option>
+                            <option value="0.8">0.8</option>
+                            </select>
+                            <label>Threshold</label>
+                        </div>
+                    </div>
+                    <button id="analyse" class="btn">Analyse metadata</button> &nbsp; <a style="display:none;" id="alink" href="#" target="_new">(view)</a>
+                </form>
+            </div>
+            <p><b>Analyser output</b></p>
+            <pre class="json">
+                <span class="pre-label">json</span>
+                <code id="json-output" class="json"></code>
+            </pre>
+
         </div>
     </div>
     <!-- Compiled and minified JavaScript -->

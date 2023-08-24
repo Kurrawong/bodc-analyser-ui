@@ -67,7 +67,7 @@ label {
     display:block;
 }
 
-pre.xml {
+pre.xml, pre.json {
     /* overflow:scroll; */
     position:relative;
     border:1px solid #ccc;
@@ -77,7 +77,7 @@ pre.xml {
     overflow: scroll;
 }
 
-#xml, #xml-output {
+#xml, #xml-output, #json-output {
     width:100%;
 }
 
