@@ -94,13 +94,13 @@ const analyser = async() => {
         const url = document.getElementById('endpoint').value;
         const xmlfile = document.getElementById('currentFile')?.getAttribute('href');
         const threshold = document.getElementById('threshold').value;
-        if(url == '') {
+        if (url == '') {
             throw new Error('Enter an analyser endpoint url');
         }
-        if(!xmlfile) {
+        if (!xmlfile) {
             throw new Error('Select a result to view');
         }
-        if(threshold == '') {
+        if (threshold == '') {
             throw new Error('Select a threshold');
         }
         const aurl = url + `?xml=${encodeURIComponent(xmlfile)}&threshold=${threshold}`;
@@ -108,14 +108,84 @@ const analyser = async() => {
         document.getElementById('alink').setAttribute('style', 'display:visible;');
         document.getElementById('json-output').innerHTML = `<div class="progress"><div class="indeterminate"></div></div>`;
         const response = await fetch(aurl);
-        const json = await response.text();
-        document.getElementById('json-output').textContent = json;
-        hljs.highlightElement(document.getElementById('json-output'));
+        const data = await response.json();
+
+        // Render heatmap table
+        const tableHTML = createHeatMapTable(data);
+        document.getElementById('json-output').innerHTML = tableHTML;
+
     } catch (ex) {
         document.getElementById('json-output').textContent = ex.message;
         console.log(ex);
     }
 };
+
+function createHeatMapTable(data) {
+    const tableHeader = `
+        <thead>
+            <tr>
+                <th>Vocabularies</th>
+                <th>Keywords (Exact)</th>
+                <th>Keywords (Wildcard)</th>
+                <th>Instruments (Exact)</th>
+                <th>Instruments (Wildcard)</th>
+                <th>Variables (Exact)</th>
+                <th>Variables (Wildcard)</th>
+            </tr>
+        </thead>`;
+
+    let tableBody = '<tbody>';
+
+    // Extract all unique concept_schemes
+    const allConceptSchemes = [];
+    for (const key in data) {
+        const bindings = data[key].results.bindings;
+        for (const binding of bindings) {
+            const scheme = binding.concept_scheme.value;
+            if (!allConceptSchemes.includes(scheme)) {
+                allConceptSchemes.push(scheme);
+            }
+        }
+    }
+
+    // Iterate over unique concept_schemes and populate table
+    for (const scheme of allConceptSchemes) {
+        tableBody += '<tr>';
+        tableBody += `<td>${scheme}</td>`;
+        tableBody += getCellValue(data, 'kws_exact', scheme);
+        tableBody += getCellValue(data, 'kws_wildcard', scheme);
+        tableBody += getCellValue(data, 'inst_exact', scheme);
+        tableBody += getCellValue(data, 'inst_wildcard', scheme);
+        tableBody += getCellValue(data, 'var_exact_strings', scheme);
+        tableBody += getCellValue(data, 'var_wildcard_strings', scheme);
+        tableBody += '</tr>';
+    }
+
+    tableBody += '</tbody>';
+
+    return `<table>${tableHeader}${tableBody}</table>`;
+}
+
+function getCellValue(data, key, scheme) {
+    if (!data[key]) return '<td></td>';
+
+    const bindings = data[key].results.bindings;
+    for (const binding of bindings) {
+        if (binding.concept_scheme.value === scheme) {
+            return `<td>${binding.sum_weight.value}</td>`;
+        }
+    }
+
+    return '<td></td>';
+}
+
+function getColor(value) {
+    const intensity = Math.min(255, value * 10);
+    return `rgb(${255-intensity}, ${255-intensity}, 255)`;
+}
+
+
+
 
 const getHtml = async (id) => {
     try {
