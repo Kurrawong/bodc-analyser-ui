@@ -94,6 +94,7 @@ const analyser = async() => {
         const url = document.getElementById('endpoint').value;
         const xmlfile = document.getElementById('currentFile')?.getAttribute('href');
         const threshold = document.getElementById('threshold').value;
+
         if (url == '') {
             throw new Error('Enter an analyser endpoint url');
         }
@@ -103,11 +104,25 @@ const analyser = async() => {
         if (threshold == '') {
             throw new Error('Select a threshold');
         }
-        const aurl = url + `?xml=${encodeURIComponent(xmlfile)}&threshold=${threshold}`;
-        document.getElementById('alink').setAttribute('href', aurl);
-        document.getElementById('alink').setAttribute('style', 'display:visible;');
+
+        const xmlContent = document.getElementById('xml-output').textContent;
+
+        // Prepare the payload
+        const payload = {
+            xml: xmlContent,
+            threshold: threshold
+        };
+
         document.getElementById('json-output').innerHTML = `<div class="progress"><div class="indeterminate"></div></div>`;
-        const response = await fetch(aurl);
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
         const data = await response.json();
 
         // Render heatmap table
@@ -119,6 +134,7 @@ const analyser = async() => {
         console.log(ex);
     }
 };
+
 
 function createHeatMapTable(data) {
     const tableHeader = `
