@@ -239,7 +239,7 @@ const init = async () => {
             <input
                 data-group="datasets"
                 data-meta="${JSON.stringify(dataset)}"
-                class="filled-in" ${true && 'checked'} 
+                class="filled-in" ${dataset.title.match(/SeaDataNet/) ? 'checked' : ''} 
                 value="${dataset.id}" type="checkbox" />
             <span>${dataset.title}</span>
             </label>
