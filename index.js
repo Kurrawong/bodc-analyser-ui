@@ -1,3 +1,6 @@
+const useSampleFile = ''
+//const useSampleFile = './2023-09-04_23-07-41_output.json'
+
 function setElementHeightToFillScreen(elementId) {
     var element = document.getElementById(elementId);
     var screenHeight = window.innerHeight;
@@ -45,7 +48,8 @@ const loadResults = async () => {
     </div>
   </div>`;
 
-    const response = await fetch(`https://gs-service-production.geodab.eu/gs-service/services/essi/view/seadatanet-broker/opensearch/query?si=1&ct=10&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=CONTAINS&tf=providerID,keyword,format,protocol,instrumentTitle,platformTitle,orgName,attributeTitle&ts=&te=&targetId=&from=&until=&sources=${ids.join(',')}&subj=&rela`); 
+//    const response = await fetch(`https://gs-service-production.geodab.eu/gs-service/services/essi/view/seadatanet-broker/opensearch/query?si=1&ct=10&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=CONTAINS&tf=providerID,keyword,format,protocol,instrumentTitle,platformTitle,orgName,attributeTitle&ts=&te=&targetId=&from=&until=&sources=${ids.join(',')}&subj=&rela`); 
+    const response = await fetch(`https://seadatanet.geodab.eu/gs-service/services/essi/view/fair-ease/opensearch/query?si=1&ct=10&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=CONTAINS&tf=providerID,keyword,format,protocol&ts=&te=&targetId=&from=&until=&subj=&rela=&evtOrd=time&sources=${ids.join(',')}`); 
     const xml = await response.text();
     let parser = new DOMParser();
     let xmlDoc = parser.parseFromString(xml, 'application/xml');
@@ -63,6 +67,8 @@ const loadResults = async () => {
     } else {
         document.getElementById('numResults').innerHTML = '';
     }
+
+    xmlMap = {};
     
     for (const entryNode of entryElements) {
 
@@ -77,13 +83,15 @@ const loadResults = async () => {
             logo: entryNode.querySelector('logo') ? entryNode.querySelector('logo').textContent : 'https://api.geodab.eu/docs/assets/img/no_overview_576.png',
             // Add more attributes as needed
         };
+        xmlMap[entry.id] = entry.title;
         entries.push(entry);
     }
+    
     document.getElementById('results').innerHTML = `<ul id="xml-list" class="collection">${entries.map(e=>
         `<li data-id="${e.id}" onClick="this.classList.contains('selected') ? this.classList.remove('selected') : this.classList.add('selected');getHtml();" class="collection-item avatar hover">
             <img src="${e.logo}" alt="" class="circle" />
             <div class="title">
-                <span class="title"><span>${e.id}</span><br/><b>${e.title}</b></span>
+                <span class="title"><span title="${e.id}">${e.id}</span><br/><b title="${e.title}">${e.title}</b></span>
                 <p title="${e.summary.length > 103 ? e.summary : ''}">${e.summary.length > 103 ? e.summary.substring(0, 100) + '...' : e.summary}</p>
             </div>
         </li>`
@@ -112,103 +120,76 @@ const analyser = async() => {
             threshold: threshold
         };
 
-        document.getElementById('json-output').innerHTML = `<div class="progress"><div class="indeterminate"></div></div>`;
+        document.getElementById('table-output').innerHTML = `<div class="progress"><div class="indeterminate"></div></div>`;
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+        let response;
+        if(useSampleFile != '') {
+            response = await fetch(useSampleFile, {method: 'GET'});
+        } else {
+            response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+        }
 
         const data = await response.json();
 
-        // Render heatmap table
-        const tableHTML = createHeatMapTable(data);
-        document.getElementById('json-output').innerHTML = tableHTML;
+        displayTable(data);
 
     } catch (ex) {
-        document.getElementById('json-output').textContent = ex.message;
+        document.getElementById('table-output').textContent = ex.message;
         console.log(ex);
     }
 };
 
-
-function createHeatMapTable(data) {
-    const tableHeader = `
-        <thead>
-            <tr>
-                <th>Vocabularies</th>
-                <th>Keywords (Exact)</th>
-                <th>Keywords (Wildcard)</th>
-                <th>Instruments (Exact)</th>
-                <th>Instruments (Wildcard)</th>
-                <th>Variables (Exact)</th>
-                <th>Variables (Wildcard)</th>
-            </tr>
-        </thead>`;
-
-    let tableBody = '<tbody>';
-
-    // Extract all unique concept_schemes
-    const allConceptSchemes = [];
-    for (const key in data) {
-        const bindings = data[key].results.bindings;
-        for (const binding of bindings) {
-            const scheme = binding.concept_scheme.value;
-            if (!allConceptSchemes.includes(scheme)) {
-                allConceptSchemes.push(scheme);
-            }
-        }
+String.prototype.hashCode = function() {
+    var hash = 0,
+      i, chr;
+    if (this.length === 0) return hash;
+    for (i = 0; i < this.length; i++) {
+      chr = this.charCodeAt(i);
+      hash = ((hash << 5) - hash) + chr;
+      hash |= 0; // Convert to 32bit integer
     }
-
-    // Iterate over unique concept_schemes and populate table
-    for (const scheme of allConceptSchemes) {
-        tableBody += '<tr>';
-        tableBody += `<td>${scheme}</td>`;
-        tableBody += getCellValue(data, 'kws_exact', scheme);
-        tableBody += getCellValue(data, 'kws_wildcard', scheme);
-        tableBody += getCellValue(data, 'inst_exact', scheme);
-        tableBody += getCellValue(data, 'inst_wildcard', scheme);
-        tableBody += getCellValue(data, 'var_exact_strings', scheme);
-        tableBody += getCellValue(data, 'var_wildcard_strings', scheme);
-        tableBody += '</tr>';
-    }
-
-    tableBody += '</tbody>';
-
-    return `<table>${tableHeader}${tableBody}</table>`;
+    return hash;
 }
+  
 
-function getCellValue(data, key, scheme) {
-    if (!data[key]) return '<td></td>';
+function displayTable(responseData) {
 
-    const bindings = data[key].results.bindings;
-    for (const binding of bindings) {
-        if (binding.concept_scheme.value === scheme) {
-            return `<td>${binding.sum_weight.value}</td>`;
-        }
-    }
+    console.log("RESULTS", responseData);
 
-    return '<td></td>';
-}
+    document.getElementById('table-output').innerHTML = Object.keys(responseData).map(key=>`<div><h2>${key in xmlMap ? xmlMap[key] : key}</h2><div id="tbl_${key.hashCode()}"></div></div>`).join('');
 
-function getColor(value) {
-    const intensity = Math.min(255, value * 10);
-    return `rgb(${255-intensity}, ${255-intensity}, 255)`;
+    Object.keys(responseData).forEach(key=>{
+        const tableData = responseData[key].kws_exact;
+        const data = tableData.results.bindings;
+//        console.log(tableData);
+        const columns = tableData.head.vars;
+        const table = new Tabulator("#tbl_" + key.hashCode(), {
+            height: 405, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+            data, //assign data to table
+            layout:"fitColumns", //fit columns to width of table (optional)
+            columns: columns.map(col=>({title: col, field: col, mutator: (value)=>value.value}))
+        });
+    });
+
 }
 
 
 let xmlResponses = {};
 let xmlSelected = {};
+let xmlMap = {};
 
 function updateFileStatus(ids) {
     document.getElementById('loadxml').innerHTML = ``;
     if(ids.length > 0) {
-        document.getElementById('loadxml').innerHTML = `<b>${ids.length} files selected:</b> <ul>${Object.keys(xmlSelected).map(xid=>`<li> - ${xid}: 
+        document.getElementById('loadxml').innerHTML = `<b>${ids.length} files selected:</b> <ul id="files-selected">${Object.keys(xmlSelected).map(xid=>`<li><span class="fn">- ${xid in xmlMap ? xmlMap[xid] : xid}</span> 
             ${xmlSelected[xid] == undefined ? '' : (xmlSelected[xid] == '' ? 
-            'loading...' : (xmlSelected[xid].length).toString() + ' bytes')}</li>`).join('')}</ul>`;
+            '<span style="width:100px;margin:0;" class="progress"><span class="indeterminate"/></span>' : '<span><small><em>(' + (xmlSelected[xid].length).toString() + ' bytes)</em></small></span>')}</li>`).join('')}</ul>`;
     }
 }
 
@@ -232,33 +213,6 @@ const getHtml = async () => {
     }
 }
 
-// const getHtml = async () => {
-//     try {
-//         const ids = Array.from(document.getElementById('xml-list').getElementsByTagName('li')).filter(el=>el.classList.contains('selected')).map(el=>el.getAttribute('data-id'));
-//         console.log(ids);
-//         xmlResponse = [];
-//         let items = []
-//         document.getElementById('loadxml').innerHTML = 'Selected items(s): '
-//         document.getElementById('xml-output').textContent = '';
-//         for(idx in ids) {
-//             const id = ids[idx];
-//             document.getElementById('xml-output').textContent+= 'ID: ' + id + ':\n\n';
-//             const url = `https://gs-service-production.geodab.eu/gs-service/services/essi/csw?service=CSW&version=2.0.2&request=GetRecordById&id=${id}&outputschema=http://www.isotc211.org/2005/gmi&elementSetName=full`;
-//             const response = await fetch(url);
-//             const xml = await response.text();
-//             items.push(`<a id="currentFile" target="_new" href="${url}">${id}</a>`)
-//             document.getElementById('loadxml').innerHTML+= items.join(', ');
-//             document.getElementById('xml-output').textContent+= xml + "\n\n";
-
-//             document.getElementById('xml-output').textContent+= xml + "\n\n";
-//             xmlResponse[id] = xml;
-//             hljs.highlightElement(document.getElementById('xml-output'));
-//         }
-//     } catch (ex) {
-//         console.log(ex);
-//     }
-// }
-
 const init = async () => {
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -268,13 +222,15 @@ const init = async () => {
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-            var elems = document.querySelectorAll('select');
-            var instances = M.FormSelect.init(elems, {});
-        });
+        var elems = document.querySelectorAll('select');
+        var instances = M.FormSelect.init(elems, {});
+    });
         
-        try {
-        const response = await fetch('https://gs-service-production.geodab.eu/gs-service/services/essi/view/seadatanet-broker/opensearch/query?si=1&ct=500&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=&tf=&ts=&te=&targetId=&from=&until=&parents=ROOT&subj=&rela=');
-//        const response = await fetch(`https://seadatanet.geodab.eu/gs-service/services/essi/view/fair-ease/opensearch/query?si=1&ct=500&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=&tf=&ts=&te=&targetId=&from=&until=&parents=ROOT&subj=&rela=`);
+    try {
+        document.getElementById('search').onclick = loadResults;
+        document.getElementById('analyse').onclick = analyser;
+//        const response = await fetch('https://gs-service-production.geodab.eu/gs-service/services/essi/view/seadatanet-broker/opensearch/query?si=1&ct=500&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=&tf=&ts=&te=&targetId=&from=&until=&parents=ROOT&subj=&rela=');
+        const response = await fetch(`https://seadatanet.geodab.eu/gs-service/services/essi/view/fair-ease/opensearch/query?si=1&ct=500&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=&tf=&ts=&te=&targetId=&from=&until=&parents=ROOT&subj=&rela=`);
         const xml = await response.text();
         const jsonObject = xml2json(xml, { maxCallStackSize: 10000 });
         const sources = document.getElementById('sources');//.innerText = JSON.stringify(jsonObject);
@@ -289,8 +245,6 @@ const init = async () => {
             </label>
         `).join('');
         await loadResults();
-        document.getElementById('search').onclick = loadResults;
-        document.getElementById('analyse').onclick = analyser;
 
     } catch (ex) {
         console.log(ex);

@@ -14,6 +14,24 @@ h1 {
 #loadxml {
     /* height:1.7rem; */
 }
+.collection .collection-item.avatar .title {
+    font-size:12px;
+}
+#sources {
+    height: 200px;
+    overflow-y: scroll;    
+}
+#files-selected li {
+    display: flex;
+    align-items: center;
+}
+#files-selected .fn {
+    max-width: 400px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px;    
+}
 h2 {
     font-size:medium;
     color:#666;

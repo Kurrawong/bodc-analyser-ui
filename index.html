@@ -12,6 +12,7 @@
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="index.css" />
+    <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
     <script>
         const module = {};
     </script>
@@ -45,8 +46,8 @@
                         </div>
                         <div class="input-field col s2">
                             <select id="threshold">
-                            <option value="" disabled selected>Select</option>
-                            <option value="1">1</option>
+                            <option value="" disabled>Select</option>
+                            <option selected value="1">1</option>
                             <option value="0.9">0.9</option>
                             <option value="0.8">0.8</option>
                             </select>
@@ -57,10 +58,7 @@
                 </form>
             </div>
             <p><b>Analyser output</b></p>
-            <pre class="json">
-                <span class="pre-label">json</span>
-                <code id="json-output" class="json"></code>
-            </pre>
+            <div id="table-output"></div>
 
         </div>
     </div>
@@ -70,6 +68,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.0.0/jsonld.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xml2json-light@1.0.6/xml2json.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
     <!-- Main application JS -->
     <script src="index.js"></script>
 </body>
