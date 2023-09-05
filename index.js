@@ -162,7 +162,7 @@ function displayTable(responseData) {
 
     console.log("RESULTS", responseData);
 
-    document.getElementById('table-output').innerHTML = Object.keys(responseData).map(key=>`<div><h2>${key in xmlMap ? xmlMap[key] : key}</h2><div id="tbl_${key.hashCode()}"></div></div>`).join('');
+    document.getElementById('table-output').innerHTML = Object.keys(responseData).map(key=>`<div><h2>${key in xmlMap ? xmlMap[key] : key}</h2><div class="tbl" id="tbl_${key.hashCode()}"></div></div>`).join('');
 
     Object.keys(responseData).forEach(key=>{
         const tableData = responseData[key];
@@ -170,7 +170,7 @@ function displayTable(responseData) {
 //        console.log(tableData);
         const columns = tableData.head.vars;
         const table = new Tabulator("#tbl_" + key.hashCode(), {
-            height: 405, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+//            height: 405, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
             data, //assign data to table
             layout:"fitColumns", //fit columns to width of table (optional)
             columns: columns.map(col=>({title: col, field: col, mutator: (value)=>value.value}))

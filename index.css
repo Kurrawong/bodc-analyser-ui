@@ -17,6 +17,9 @@ h1 {
 .collection .collection-item.avatar .title {
     font-size:12px;
 }
+.tbl {
+    max-height: 400px;
+}
 #sources {
     height: 200px;
     overflow-y: scroll;    
