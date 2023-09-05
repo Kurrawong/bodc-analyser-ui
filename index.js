@@ -165,7 +165,7 @@ function displayTable(responseData) {
     document.getElementById('table-output').innerHTML = Object.keys(responseData).map(key=>`<div><h2>${key in xmlMap ? xmlMap[key] : key}</h2><div id="tbl_${key.hashCode()}"></div></div>`).join('');
 
     Object.keys(responseData).forEach(key=>{
-        const tableData = responseData[key].kws_exact;
+        const tableData = responseData[key];
         const data = tableData.results.bindings;
 //        console.log(tableData);
         const columns = tableData.head.vars;
