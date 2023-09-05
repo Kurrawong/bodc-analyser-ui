@@ -12,7 +12,7 @@ h1 {
     margin-top:10px;
 }
 #loadxml {
-    height:1.7rem;
+    /* height:1.7rem; */
 }
 h2 {
     font-size:medium;
@@ -192,8 +192,22 @@ table.popup-table .tbl-value {
     padding-right: 30px; /* Adjust the padding as needed */
     cursor: pointer;
 }
+
+.id {
+    font-size:small;
+}
+
+.collection li.collection-item.selected {
+    background-color:#ccc;
+}
   
 /* Add hover effect */
 .info-icon:hover::before {
     font-size: 12px;
+}
+
+.cb.title {
+    position:absolute;
+    top:0;
+    left:-30px;
 }

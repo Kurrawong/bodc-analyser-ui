@@ -79,12 +79,13 @@ const loadResults = async () => {
         };
         entries.push(entry);
     }
-    document.getElementById('results').innerHTML = `<ul class="collection">${entries.map(e=>
-        `<li onclick="getHtml('${e.id}')" class="collection-item avatar hover">
-            <img src="${e.logo}" alt="" class="circle">
-            <span class="title">${e.id}</span>
-            <span class="title">${e.title}</span>
-            <p title="${e.summary.length > 103 ? e.summary : ''}">${e.summary.length > 103 ? e.summary.substring(0, 100) + '...' : e.summary}</p>
+    document.getElementById('results').innerHTML = `<ul id="xml-list" class="collection">${entries.map(e=>
+        `<li data-id="${e.id}" onClick="this.classList.contains('selected') ? this.classList.remove('selected') : this.classList.add('selected');getHtml();" class="collection-item avatar hover">
+            <img src="${e.logo}" alt="" class="circle" />
+            <div class="title">
+                <span class="title"><span>${e.id}</span><br/><b>${e.title}</b></span>
+                <p title="${e.summary.length > 103 ? e.summary : ''}">${e.summary.length > 103 ? e.summary.substring(0, 100) + '...' : e.summary}</p>
+            </div>
         </li>`
     ).join('')}</ul>`;
 };
@@ -109,7 +110,7 @@ const analyser = async() => {
 
         // Prepare the payload
         const payload = {
-            xml: xmlContent,
+            xml: xmlSelected,
             threshold: threshold
         };
 
@@ -201,30 +202,81 @@ function getColor(value) {
 }
 
 
+let xmlResponses = {};
+let xmlSelected = {};
 
-
-const getHtml = async (id) => {
-    try {
-        document.getElementById('loadxml').innerHTML = `Loading ${id}<div class="progress"><div class="indeterminate"></div></div>`;
-        const url = `https://gs-service-production.geodab.eu/gs-service/services/essi/csw?service=CSW&version=2.0.2&request=GetRecordById&id=${id}&outputschema=http://www.isotc211.org/2005/gmi&elementSetName=full`;
-        const response = await fetch(url);
-        const xml = await response.text();
-        document.getElementById('loadxml').innerHTML = `<a id="currentFile" target="_new" href="${url}">Showing ${id}</a>`;
-        document.getElementById('xml-output').textContent = xml;
-        hljs.highlightElement(document.getElementById('xml-output'));
-    } catch (ex) {
-        console.log(ex);
+function updateFileStatus(ids) {
+    document.getElementById('loadxml').innerHTML = ``;
+    if(ids.length > 0) {
+        document.getElementById('loadxml').innerHTML = `<b>${ids.length} files selected:</b> <ul>${Object.keys(xmlSelected).map(xid=>`<li> - ${xid}: 
+            ${xmlSelected[xid] == undefined ? '' : (xmlSelected[xid] == '' ? 
+            'loading...' : (xmlSelected[xid].length).toString() + ' bytes')}</li>`).join('')}</ul>`;
     }
 }
 
+const getHtml = async () => {
+    const ids = Array.from(document.getElementById('xml-list').getElementsByTagName('li')).filter(el=>el.classList.contains('selected')).map(el=>el.getAttribute('data-id'));
+    xmlSelected = ids.reduce((obj, item) => ({ ...obj, [item]: undefined }), {});
+    updateFileStatus(ids);
+    for(idx in ids) {
+        const id = ids[idx];
+        xmlSelected[id] = '';
+        updateFileStatus(ids);
+        if(!(id in xmlResponses)) {
+            xmlResponses[id] = '';
+            const url = `https://gs-service-production.geodab.eu/gs-service/services/essi/csw?service=CSW&version=2.0.2&request=GetRecordById&id=${id}&outputschema=http://www.isotc211.org/2005/gmi&elementSetName=full`;
+            const response = await fetch(url);
+            const xml = await response.text();
+            xmlResponses[id] = xml;
+        }
+        xmlSelected[id] = xmlResponses[id];
+        updateFileStatus(ids);
+    }
+}
+
+// const getHtml = async () => {
+//     try {
+//         const ids = Array.from(document.getElementById('xml-list').getElementsByTagName('li')).filter(el=>el.classList.contains('selected')).map(el=>el.getAttribute('data-id'));
+//         console.log(ids);
+//         xmlResponse = [];
+//         let items = []
+//         document.getElementById('loadxml').innerHTML = 'Selected items(s): '
+//         document.getElementById('xml-output').textContent = '';
+//         for(idx in ids) {
+//             const id = ids[idx];
+//             document.getElementById('xml-output').textContent+= 'ID: ' + id + ':\n\n';
+//             const url = `https://gs-service-production.geodab.eu/gs-service/services/essi/csw?service=CSW&version=2.0.2&request=GetRecordById&id=${id}&outputschema=http://www.isotc211.org/2005/gmi&elementSetName=full`;
+//             const response = await fetch(url);
+//             const xml = await response.text();
+//             items.push(`<a id="currentFile" target="_new" href="${url}">${id}</a>`)
+//             document.getElementById('loadxml').innerHTML+= items.join(', ');
+//             document.getElementById('xml-output').textContent+= xml + "\n\n";
+
+//             document.getElementById('xml-output').textContent+= xml + "\n\n";
+//             xmlResponse[id] = xml;
+//             hljs.highlightElement(document.getElementById('xml-output'));
+//         }
+//     } catch (ex) {
+//         console.log(ex);
+//     }
+// }
+
 const init = async () => {
-        document.addEventListener('DOMContentLoaded', function() {
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const endpointParam = urlParams.get('endpoint');
+    if(endpointParam) {
+        document.getElementById('endpoint').value = endpointParam;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
             var elems = document.querySelectorAll('select');
             var instances = M.FormSelect.init(elems, {});
         });
         
         try {
         const response = await fetch('https://gs-service-production.geodab.eu/gs-service/services/essi/view/seadatanet-broker/opensearch/query?si=1&ct=500&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=&tf=&ts=&te=&targetId=&from=&until=&parents=ROOT&subj=&rela=');
+//        const response = await fetch(`https://seadatanet.geodab.eu/gs-service/services/essi/view/fair-ease/opensearch/query?si=1&ct=500&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=&tf=&ts=&te=&targetId=&from=&until=&parents=ROOT&subj=&rela=`);
         const xml = await response.text();
         const jsonObject = xml2json(xml, { maxCallStackSize: 10000 });
         const sources = document.getElementById('sources');//.innerText = JSON.stringify(jsonObject);
