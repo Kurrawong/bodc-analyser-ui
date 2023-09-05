@@ -99,14 +99,12 @@ const analyser = async() => {
         if (url == '') {
             throw new Error('Enter an analyser endpoint url');
         }
-        if (!xmlfile) {
+        if (Object.keys(xmlSelected) == 0) {
             throw new Error('Select a result to view');
         }
         if (threshold == '') {
             throw new Error('Select a threshold');
         }
-
-        const xmlContent = document.getElementById('xml-output').textContent;
 
         // Prepare the payload
         const payload = {
