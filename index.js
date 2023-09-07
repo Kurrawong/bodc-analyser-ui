@@ -1,4 +1,5 @@
 const useSampleFile = ''
+
 //const useSampleFile = './2023-09-04_23-07-41_output.json'
 
 function setElementHeightToFillScreen(elementId) {
@@ -6,12 +7,13 @@ function setElementHeightToFillScreen(elementId) {
     var screenHeight = window.innerHeight;
     var elementOffsetTop = element.offsetTop;
     var elementHeight = screenHeight - elementOffsetTop - 20;
-  
+
     element.style.height = elementHeight + "px";
 }
+
 function setElementWidthToFillScreen(elementId) {
     var element = document.getElementById(elementId);
-  
+
     element.style.width = element.clientWidth + "px";
     element.style.maxWidth = element.clientWidth + "px";
 }
@@ -22,16 +24,16 @@ setElementWidthToFillScreen('xml');
 const loadResults = async () => {
 
     checkboxes = document.querySelectorAll('input[type="checkbox"]');
- 
+
     const ids = [];
     // Attach event listeners to checkboxes
-    checkboxes.forEach(function(checkbox) {
-        if(checkbox.checked) {
+    checkboxes.forEach(function (checkbox) {
+        if (checkbox.checked) {
             ids.push(checkbox.getAttribute('value'));
         }
     });
     console.log(ids);
-    if(ids.length == 0) {
+    if (ids.length == 0) {
         document.getElementById('numResults').innerHTML = ' (select a source)';
         document.getElementById('results').innerHTML = '';
         return;
@@ -49,7 +51,7 @@ const loadResults = async () => {
   </div>`;
 
 //    const response = await fetch(`https://gs-service-production.geodab.eu/gs-service/services/essi/view/seadatanet-broker/opensearch/query?si=1&ct=10&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=CONTAINS&tf=providerID,keyword,format,protocol,instrumentTitle,platformTitle,orgName,attributeTitle&ts=&te=&targetId=&from=&until=&sources=${ids.join(',')}&subj=&rela`); 
-    const response = await fetch(`https://seadatanet.geodab.eu/gs-service/services/essi/view/fair-ease/opensearch/query?si=1&ct=10&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=CONTAINS&tf=providerID,keyword,format,protocol&ts=&te=&targetId=&from=&until=&subj=&rela=&evtOrd=time&sources=${ids.join(',')}`); 
+    const response = await fetch(`https://seadatanet.geodab.eu/gs-service/services/essi/view/fair-ease/opensearch/query?si=1&ct=10&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=CONTAINS&tf=providerID,keyword,format,protocol&ts=&te=&targetId=&from=&until=&subj=&rela=&evtOrd=time&sources=${ids.join(',')}`);
     const xml = await response.text();
     let parser = new DOMParser();
     let xmlDoc = parser.parseFromString(xml, 'application/xml');
@@ -69,7 +71,7 @@ const loadResults = async () => {
     }
 
     xmlMap = {};
-    
+
     for (const entryNode of entryElements) {
 
         const entry = {
@@ -86,8 +88,8 @@ const loadResults = async () => {
         xmlMap[entry.id] = entry.title;
         entries.push(entry);
     }
-    
-    document.getElementById('results').innerHTML = `<ul id="xml-list" class="collection">${entries.map(e=>
+
+    document.getElementById('results').innerHTML = `<ul id="xml-list" class="collection">${entries.map(e =>
         `<li data-id="${e.id}" onClick="this.classList.contains('selected') ? this.classList.remove('selected') : this.classList.add('selected');getHtml();" class="collection-item avatar hover">
             <img src="${e.logo}" alt="" class="circle" />
             <div class="title">
@@ -98,7 +100,7 @@ const loadResults = async () => {
     ).join('')}</ul>`;
 };
 
-const analyser = async() => {
+const analyser = async () => {
     try {
         const url = document.getElementById('endpoint').value;
         const xmlfile = document.getElementById('currentFile')?.getAttribute('href');
@@ -123,7 +125,7 @@ const analyser = async() => {
         document.getElementById('table-output').innerHTML = `<div class="progress"><div class="indeterminate"></div></div>`;
 
         let response;
-        if(useSampleFile != '') {
+        if (useSampleFile != '') {
             response = await fetch(useSampleFile, {method: 'GET'});
         } else {
             response = await fetch(url, {
@@ -145,39 +147,68 @@ const analyser = async() => {
     }
 };
 
-String.prototype.hashCode = function() {
+String.prototype.hashCode = function () {
     var hash = 0,
-      i, chr;
+        i, chr;
     if (this.length === 0) return hash;
     for (i = 0; i < this.length; i++) {
-      chr = this.charCodeAt(i);
-      hash = ((hash << 5) - hash) + chr;
-      hash |= 0; // Convert to 32bit integer
+        chr = this.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
     }
     return hash;
 }
-  
+
 
 function displayTable(responseData) {
-
     console.log("RESULTS", responseData);
 
-    document.getElementById('table-output').innerHTML = Object.keys(responseData).map(key=>`<div><h2>${key in xmlMap ? xmlMap[key] : key}</h2><div class="tbl" id="tbl_${key.hashCode()}"></div></div>`).join('');
+    document.getElementById('table-output').innerHTML = Object.keys(responseData).map(key => `<div><h2>${key in xmlMap ? xmlMap[key] : key}</h2><div class="tbl" id="tbl_${key.hashCode()}"></div></div>`).join('');
 
-    Object.keys(responseData).forEach(key=>{
+    Object.keys(responseData).forEach(key => {
         const tableData = responseData[key];
         const data = tableData.results.bindings;
-//        console.log(tableData);
         const columns = tableData.head.vars;
+
+        // Splitting columns into separate arrays
+        let methodColumns = [];
+        let otherColumns = [];
+
+        columns.forEach(col => {
+            if (col === 'Method') {
+                methodColumns.push({
+                    title: 'Method',
+                    field: 'Method',
+                    mutator: (value) => value.value
+                });
+            } else if (col === 'MatchURI') {
+                otherColumns.push({
+                    title: col,
+                    field: col,
+                    formatter: "link",
+                    formatterParams: {
+                        label: (cell) => cell.getData().MatchURI.value,
+                        url: (cell) => cell.getData().MatchURI.value,
+                        target: "_blank",
+                    }
+                });
+            } else {
+                otherColumns.push({
+                    title: col,
+                    field: col,
+                    mutator: (value) => value.value
+                });
+            }
+        });
+
         const table = new Tabulator("#tbl_" + key.hashCode(), {
-//            height: 405, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
-            data, //assign data to table
-            layout:"fitColumns", //fit columns to width of table (optional)
-            columns: columns.map(col=>({title: col, field: col, mutator: (value)=>value.value}))
+            data: data,
+            columns: [...methodColumns, ...otherColumns] // Concatenating to ensure 'Method' is always first
         });
     });
-
 }
+
+
 
 
 let xmlResponses = {};
@@ -186,22 +217,22 @@ let xmlMap = {};
 
 function updateFileStatus(ids) {
     document.getElementById('loadxml').innerHTML = ``;
-    if(ids.length > 0) {
-        document.getElementById('loadxml').innerHTML = `<b>${ids.length} files selected:</b> <ul id="files-selected">${Object.keys(xmlSelected).map(xid=>`<li><span class="fn">- ${xid in xmlMap ? xmlMap[xid] : xid}</span> 
-            ${xmlSelected[xid] == undefined ? '' : (xmlSelected[xid] == '' ? 
+    if (ids.length > 0) {
+        document.getElementById('loadxml').innerHTML = `<b>${ids.length} files selected:</b> <ul id="files-selected">${Object.keys(xmlSelected).map(xid => `<li><span class="fn">- ${xid in xmlMap ? xmlMap[xid] : xid}</span> 
+            ${xmlSelected[xid] == undefined ? '' : (xmlSelected[xid] == '' ?
             '<span style="width:100px;margin:0;" class="progress"><span class="indeterminate"/></span>' : '<span><small><em>(' + (xmlSelected[xid].length).toString() + ' bytes)</em></small></span>')}</li>`).join('')}</ul>`;
     }
 }
 
 const getHtml = async () => {
-    const ids = Array.from(document.getElementById('xml-list').getElementsByTagName('li')).filter(el=>el.classList.contains('selected')).map(el=>el.getAttribute('data-id'));
-    xmlSelected = ids.reduce((obj, item) => ({ ...obj, [item]: undefined }), {});
+    const ids = Array.from(document.getElementById('xml-list').getElementsByTagName('li')).filter(el => el.classList.contains('selected')).map(el => el.getAttribute('data-id'));
+    xmlSelected = ids.reduce((obj, item) => ({...obj, [item]: undefined}), {});
     updateFileStatus(ids);
-    for(idx in ids) {
+    for (idx in ids) {
         const id = ids[idx];
         xmlSelected[id] = '';
         updateFileStatus(ids);
-        if(!(id in xmlResponses)) {
+        if (!(id in xmlResponses)) {
             xmlResponses[id] = '';
             const url = `https://gs-service-production.geodab.eu/gs-service/services/essi/csw?service=CSW&version=2.0.2&request=GetRecordById&id=${id}&outputschema=http://www.isotc211.org/2005/gmi&elementSetName=full`;
             const response = await fetch(url);
@@ -217,22 +248,22 @@ const init = async () => {
 
     const urlParams = new URLSearchParams(window.location.search);
     const endpointParam = urlParams.get('endpoint');
-    if(endpointParam) {
+    if (endpointParam) {
         document.getElementById('endpoint').value = endpointParam;
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         var elems = document.querySelectorAll('select');
         var instances = M.FormSelect.init(elems, {});
     });
-        
+
     try {
         document.getElementById('search').onclick = loadResults;
         document.getElementById('analyse').onclick = analyser;
 //        const response = await fetch('https://gs-service-production.geodab.eu/gs-service/services/essi/view/seadatanet-broker/opensearch/query?si=1&ct=500&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=&tf=&ts=&te=&targetId=&from=&until=&parents=ROOT&subj=&rela=');
         const response = await fetch(`https://seadatanet.geodab.eu/gs-service/services/essi/view/fair-ease/opensearch/query?si=1&ct=500&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=&tf=&ts=&te=&targetId=&from=&until=&parents=ROOT&subj=&rela=`);
         const xml = await response.text();
-        const jsonObject = xml2json(xml, { maxCallStackSize: 10000 });
+        const jsonObject = xml2json(xml, {maxCallStackSize: 10000});
         const sources = document.getElementById('sources');//.innerText = JSON.stringify(jsonObject);
         sources.innerHTML = jsonObject.feed.entry.map((dataset, index) => `
             <label>
