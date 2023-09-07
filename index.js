@@ -209,8 +209,6 @@ function displayTable(responseData) {
 }
 
 
-
-
 let xmlResponses = {};
 let xmlSelected = {};
 let xmlMap = {};
@@ -265,16 +263,32 @@ const init = async () => {
         const xml = await response.text();
         const jsonObject = xml2json(xml, {maxCallStackSize: 10000});
         const sources = document.getElementById('sources');//.innerText = JSON.stringify(jsonObject);
-        sources.innerHTML = jsonObject.feed.entry.map((dataset, index) => `
-            <label>
-            <input
-                data-group="datasets"
-                data-meta="${JSON.stringify(dataset)}"
-                class="filled-in" ${dataset.title.match(/SeaDataNet/) ? 'checked' : ''} 
-                value="${dataset.id}" type="checkbox" />
-            <span>${dataset.title}</span>
-            </label>
-        `).join('');
+        sources.innerHTML = `
+                ` + jsonObject.feed.entry.map((dataset, index) => `
+                    <label>
+                        <input
+                            data-group="datasets"
+                            data-meta="${JSON.stringify(dataset)}"
+                            class="filled-in" ${dataset.title.match(/SeaDataNet/) ? 'checked' : ''} 
+                            value="${dataset.id}" type="checkbox" />
+                        <span>${dataset.title}</span>
+                    </label>
+                `).join('');
+
+// 2. Event listener for the button
+        document.getElementById('toggleSelect').addEventListener('click', function () {
+            const allCheckboxes = document.querySelectorAll('input[data-group="datasets"]');
+            const allChecked = Array.from(allCheckboxes).every(checkbox => checkbox.checked);
+
+            allCheckboxes.forEach(checkbox => {
+                checkbox.checked = !allChecked;  // toggle the checked state
+            });
+
+            // 3. Update the button's label
+            this.textContent = allChecked ? 'Select All' : 'Select None';
+        });
+
+
         await loadResults();
 
     } catch (ex) {
