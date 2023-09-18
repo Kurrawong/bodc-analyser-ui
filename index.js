@@ -18,60 +18,32 @@ function setElementWidthToFillScreen(elementId) {
     element.style.maxWidth = element.clientWidth + "px";
 }
 
-//setElementHeightToFillScreen('xml');
 setElementWidthToFillScreen('xml');
 
-const loadResults = async () => {
+let currentPage = 1;
+const resultsPerPage = 10;
+let totalResults = 0;
+let totalPages = 1;
+let currentIds = [];
 
-    checkboxes = document.querySelectorAll('input[type="checkbox"]');
-
-    const ids = [];
-    // Attach event listeners to checkboxes
-    checkboxes.forEach(function (checkbox) {
-        if (checkbox.checked) {
-            ids.push(checkbox.getAttribute('value'));
-        }
-    });
-    console.log(ids);
-    if (ids.length == 0) {
-        document.getElementById('numResults').innerHTML = ' (select a source)';
-        document.getElementById('results').innerHTML = '';
-        return;
-    }
-    document.getElementById('results').innerHTML = `  <div class="preloader-wrapper small active">
-    <div class="spinner-layer spinner-green-only">
-      <div class="circle-clipper left">
-        <div class="circle"></div>
-      </div><div class="gap-patch">
-        <div class="circle"></div>
-      </div><div class="circle-clipper right">
-        <div class="circle"></div>
-      </div>
-    </div>
-  </div>`;
-
-//    const response = await fetch(`https://gs-service-production.geodab.eu/gs-service/services/essi/view/seadatanet-broker/opensearch/query?si=1&ct=10&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=CONTAINS&tf=providerID,keyword,format,protocol,instrumentTitle,platformTitle,orgName,attributeTitle&ts=&te=&targetId=&from=&until=&sources=${ids.join(',')}&subj=&rela`); 
-    const response = await fetch(`https://seadatanet.geodab.eu/gs-service/services/essi/view/fair-ease/opensearch/query?si=1&ct=10&st=&kwd=&frmt=&prot=&kwdOrBbox=&sscScore=&instrumentTitle=&platformTitle=&attributeTitle=&organisationName=&searchFields=&bbox=&rel=CONTAINS&tf=providerID,keyword,format,protocol&ts=&te=&targetId=&from=&until=&subj=&rela=&evtOrd=time&sources=${ids.join(',')}`);
+const loadPageResults = async (page) => {
+    const startIndex = (page - 1) * resultsPerPage + 1;
+    const response = await fetch(`https://seadatanet.geodab.eu/gs-service/services/essi/view/fair-ease/opensearch/query?si=${startIndex}&ct=${resultsPerPage}&...&sources=${currentIds.join(',')}`);
     const xml = await response.text();
+
     let parser = new DOMParser();
     let xmlDoc = parser.parseFromString(xml, 'application/xml');
 
     const atomNamespace = 'http://www.w3.org/2005/Atom';
-
-    // Find all <entry> elements using getElementsByTagNameNS
     const entryElements = xmlDoc.getElementsByTagNameNS(atomNamespace, 'entry');
 
-    const entries = [];
     const totalResultsElement = xmlDoc.querySelector('totalResults');
-
     if (totalResultsElement) {
-        document.getElementById('numResults').innerHTML = ' (' + totalResultsElement.textContent + ')';
-    } else {
-        document.getElementById('numResults').innerHTML = '';
+        totalResults = parseInt(totalResultsElement.textContent);
+        totalPages = Math.ceil(totalResults / resultsPerPage);
     }
 
-    xmlMap = {};
-
+    const entries = [];
     for (const entryNode of entryElements) {
 
         const entry = {
@@ -98,7 +70,46 @@ const loadResults = async () => {
             </div>
         </li>`
     ).join('')}</ul>`;
+    updatePaginationControls();
 };
+
+const updatePaginationControls = () => {
+    document.getElementById('prevButton').disabled = currentPage <= 1;
+    document.getElementById('nextButton').disabled = currentPage >= totalPages;
+};
+
+const loadResults = async () => {
+    checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    currentIds = [];
+    checkboxes.forEach(function (checkbox) {
+        if (checkbox.checked) {
+            currentIds.push(checkbox.getAttribute('value'));
+        }
+    });
+    if (currentIds.length == 0) {
+        document.getElementById('numResults').innerHTML = ' (select a source)';
+        document.getElementById('results').innerHTML = '';
+        return;
+    }
+    currentPage = 1;
+    loadPageResults(currentPage);
+};
+
+document.getElementById('prevButton').addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        loadPageResults(currentPage);
+    }
+});
+
+document.getElementById('nextButton').addEventListener('click', () => {
+    if (currentPage < totalPages) {
+        currentPage++;
+        loadPageResults(currentPage);
+    }
+});
+
+
 
 const analyser = async () => {
     try {
@@ -214,13 +225,19 @@ let xmlSelected = {};
 let xmlMap = {};
 
 function updateFileStatus(ids) {
-    document.getElementById('loadxml').innerHTML = ``;
+    let content = '';
     if (ids.length > 0) {
-        document.getElementById('loadxml').innerHTML = `<b>${ids.length} files selected:</b> <ul id="files-selected">${Object.keys(xmlSelected).map(xid => `<li><span class="fn">- ${xid in xmlMap ? xmlMap[xid] : xid}</span> 
-            ${xmlSelected[xid] == undefined ? '' : (xmlSelected[xid] == '' ?
-            '<span style="width:100px;margin:0;" class="progress"><span class="indeterminate"/></span>' : '<span><small><em>(' + (xmlSelected[xid].length).toString() + ' bytes)</em></small></span>')}</li>`).join('')}</ul>`;
+        content += `<b>${ids.length} files selected:</b> <ul id="files-selected">${Object.keys(xmlSelected).map(xid => `
+            <li><span class="fn">- ${xid in xmlMap ? xmlMap[xid] : xid}</span> 
+            ${xmlSelected[xid] === undefined ? '' : (xmlSelected[xid] === '' ?
+            '<span style="width:100px;margin:0;" class="progress"><span class="indeterminate"/></span>' : '<span><small><em>(' + (xmlSelected[xid].length).toString() + ' bytes)</em></small></span>')}
+            </li>`).join('')}
+        </ul>`;
     }
+    document.getElementById('loadxml').innerHTML = content;
 }
+
+
 
 const getHtml = async () => {
     const ids = Array.from(document.getElementById('xml-list').getElementsByTagName('li')).filter(el => el.classList.contains('selected')).map(el => el.getAttribute('data-id'));
@@ -295,5 +312,6 @@ const init = async () => {
         console.log(ex);
     }
 };
+
 
 init()

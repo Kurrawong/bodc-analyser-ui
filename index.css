@@ -232,3 +232,9 @@ table.popup-table .tbl-value {
     top:0;
     left:-30px;
 }
+
+#results {
+    height: 500px; /* You can adjust this to your desired height */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
