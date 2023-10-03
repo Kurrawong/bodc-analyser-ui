@@ -1,6 +1,6 @@
-// const useSampleFile = ''
+const useSampleFile = ''
 
-const useSampleFile = './2023-10-03_sample_response.json'
+// const useSampleFile = './2023-10-03_sample_response.json'
 
 function setElementHeightToFillScreen(elementId) {
     var element = document.getElementById(elementId);
