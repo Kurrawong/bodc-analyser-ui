@@ -18,7 +18,7 @@ h1 {
     font-size:12px;
 }
 .tbl {
-    max-height: 400px;
+    max-height: 1000px;
 }
 #sources {
     height: 200px;
@@ -234,7 +234,7 @@ table.popup-table .tbl-value {
 }
 
 #results {
-    height: 500px; /* You can adjust this to your desired height */
+    height: 1000px; /* You can adjust this to your desired height */
     overflow-y: auto;
     overflow-x: hidden;
 }
