@@ -1,6 +1,6 @@
-const useSampleFile = ''
+// const useSampleFile = ''
 
-//const useSampleFile = './2023-09-04_23-07-41_output.json'
+const useSampleFile = './2023-10-03_sample_response.json'
 
 function setElementHeightToFillScreen(elementId) {
     var element = document.getElementById(elementId);
@@ -110,7 +110,6 @@ document.getElementById('nextButton').addEventListener('click', () => {
 });
 
 
-
 const analyser = async () => {
     try {
         const url = document.getElementById('endpoint').value;
@@ -176,45 +175,99 @@ function displayTable(responseData) {
 
     document.getElementById('table-output').innerHTML = Object.keys(responseData).map(key => `<div><h2>${key in xmlMap ? xmlMap[key] : key}</h2><div class="tbl" id="tbl_${key.hashCode()}"></div></div>`).join('');
 
+    const columnsToHide = ["TargetElement", "ExactMatch", "Container", "Collection"];
+
     Object.keys(responseData).forEach(key => {
         const tableData = responseData[key];
         const data = tableData.results.bindings;
         const columns = tableData.head.vars;
 
-        // Splitting columns into separate arrays
-        let methodColumns = [];
+        let metadataElementColumns = [];
         let otherColumns = [];
 
         columns.forEach(col => {
-            if (col === 'Method') {
-                methodColumns.push({
-                    title: 'Method',
-                    field: 'Method',
-                    mutator: (value) => value.value
+            const isColumnHidden = columnsToHide.includes(col);
+
+            if (col === 'TargetElement') {
+                metadataElementColumns.push({
+                    title: 'TargetElement',
+                    field: 'TargetElement',
+                    mutator: (value) => value.value,
+                    visible: !isColumnHidden
                 });
             } else if (col === 'MatchURI') {
                 otherColumns.push({
-                    title: col,
+                    title: "Match Concept",
                     field: col,
+                    width: 200,
                     formatter: "link",
                     formatterParams: {
-                        label: (cell) => cell.getData().MatchURI.value,
+                        label: (cell) => cell.getData().MatchTerm.value,
                         url: (cell) => cell.getData().MatchURI.value,
                         target: "_blank",
-                    }
+                    },
+                    visible: !isColumnHidden
                 });
-            } else {
+            } else if (col === 'ContainerLabel') {
+                otherColumns.push({
+                    title: 'Collection',
+                    field: col,
+                    width: 200,
+                    mutator: (value) => {
+                        if (value.value && value.value.trim() !== "") {
+                            return "Collection: " + value.value;
+                        } else {
+                            return "Collection: Unknown";
+                        }
+                    },
+                    visible: !isColumnHidden
+                });
+            } else if (col !== 'MatchTerm') {
                 otherColumns.push({
                     title: col,
                     field: col,
-                    mutator: (value) => value.value
+                    width: 200,
+                    mutator: (value) => value.value,
+                    visible: !isColumnHidden
                 });
             }
         });
 
         const table = new Tabulator("#tbl_" + key.hashCode(), {
+            height:"100%",
             data: data,
-            columns: [...methodColumns, ...otherColumns] // Concatenating to ensure 'Method' is always first
+            columns: [...metadataElementColumns, ...otherColumns],
+            groupBy: ["TargetElement", "ExactMatch", "ContainerLabel"],
+            groupOrder: "asc",
+            groupHeader: function (value, count, data, group) {
+                if (group.field === "ExactMatch") {
+                    return data; // Directly use the value "Exact Match" or "Wildcard Match"
+                }
+                return value + "<span style='color:#d00; margin-left:10px;'>(" + count + " items)</span>";
+            },
+            groupStartOpen: (value, count, data, group) => {
+                const field = group.getField();
+
+                switch (field) {
+                    case "ExactMatch":
+                        if (value === "Wildcard Match") {
+                            // Check if there's any data with an "Exact Match" value for ExactMatch in the group
+                            const parentGroup = group.getParentGroup();
+                            if (parentGroup) {
+                                const siblingGroups = parentGroup.getSubGroups();
+                                if (siblingGroups.some(g => g.getKey() === "Exact Match")) {
+                                    return false; // Close "Wildcard Match" group if "Exact Match" exists
+                                }
+                            }
+                        }
+                        return true; // Default open for "Exact Match"
+                    case "TargetElement":
+                    case "ContainerLabel":
+                    default:
+                        return true; // Default open for all other groups
+                }
+            }
+
         });
     });
 }
@@ -236,7 +289,6 @@ function updateFileStatus(ids) {
     }
     document.getElementById('loadxml').innerHTML = content;
 }
-
 
 
 const getHtml = async () => {

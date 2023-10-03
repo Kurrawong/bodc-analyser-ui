@@ -1,0 +1,642 @@
+{
+  "sdn-open:urn:SDN:CDI:LOCAL:96-2537-96-ds01-4": {
+    "all_search_elements": {
+      "Instrument": {
+        "identifiers": [
+          "SDN:L05::124",
+          "SDN:L05::130",
+          "SDN:L05::30"
+        ],
+        "strings": [
+          "discrete water samplers",
+          "transmissometers",
+          "ctd"
+        ],
+        "uris": [
+          "http://www.seadatanet.org/urnurl/SDN:L05::30/",
+          "http://www.seadatanet.org/urnurl/SDN:L05::124/",
+          "http://www.seadatanet.org/urnurl/SDN:L05::130/"
+        ]
+      },
+      "Keywords": {
+        "identifiers": [],
+        "strings": [
+          "oceans"
+        ],
+        "uris": []
+      },
+      "Platform": {
+        "identifiers": [
+          "SDN:L06::0"
+        ],
+        "strings": [],
+        "uris": [
+          "http://www.seadatanet.org/urnurl/SDN:L06::0/"
+        ]
+      },
+      "Variable": {
+        "identifiers": [
+          "SDN:P02::CPWC",
+          "SDN:P02::NTOT",
+          "SDN:P02::NTRI",
+          "SDN:P02::TDPX",
+          "SDN:P02::PHOS",
+          "SDN:P02::PEWB",
+          "SDN:P02::PSAL",
+          "SDN:P02::TEMP",
+          "SDN:P02::DOXY",
+          "SDN:P02::PPWC",
+          "SDN:P02::WCOC",
+          "SDN:P02::NTRA",
+          "SDN:P02::SECC",
+          "SDN:P02::SLCA",
+          "SDN:P02::AMON",
+          "SDN:P02::MTWD",
+          "SDN:P02::ALKY",
+          "SDN:P02::TDNT"
+        ],
+        "strings": [
+          "silicate concentration parameters in the water column",
+          "dissolved total or organic phosphorus concentration in the water column",
+          "concentration of polychlorobiphenyls (pcbs) in the water column",
+          "concentration of other organic contaminants in the water column",
+          "particulate total and organic nitrogen concentrations in the water column",
+          "nitrate concentration parameters in the water column",
+          "dissolved oxygen parameters in the water column",
+          "dissolved metal concentrations in the water column",
+          "pesticide concentrations in water bodies",
+          "chlorophyll pigment concentrations in water bodies",
+          "alkalinity acidity and ph of the water column",
+          "phosphate concentration parameters in the water column",
+          "temperature of the water column",
+          "salinity of the water column",
+          "nitrite concentration parameters in the water column",
+          "secchi disk depth",
+          "ammonium and ammonia concentration parameters in water bodies",
+          "dissolved total and organic nitrogen concentrations in the water column"
+        ],
+        "uris": [
+          "http://www.seadatanet.org/urnurl/SDN:P02::PSAL/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::PHOS/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::AMON/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::PEWB/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::DOXY/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::NTRI/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::CPWC/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::TDPX/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::TDNT/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::PPWC/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::SLCA/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::WCOC/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::MTWD/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::TEMP/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::NTRA/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::ALKY/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::SECC/",
+          "http://www.seadatanet.org/urnurl/SDN:P02::NTOT/"
+        ]
+      }
+    },
+    "head": {
+      "vars": [
+        "MatchURI",
+        "MatchProperty",
+        "MatchTerm",
+        "SearchTerm",
+        "Container",
+        "ContainerLabel",
+        "Method",
+        "TargetElement"
+      ]
+    },
+    "results": {
+      "bindings": [
+        {
+          "Container": {
+            "type": "literal",
+            "value": ""
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": ""
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "OCEANS"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "https://gcmd.earthdata.nasa.gov/kms/concept/c47f6052-634e-40ef-a5ac-13f69f6f4c2a"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "oceans"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Keywords"
+          }
+        },
+        {
+          "Container": {
+            "type": "literal",
+            "value": ""
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": ""
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "OCEANS"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "https://gcmd.earthdata.nasa.gov/kms/concept/885735f3-121e-4ca0-ac8b-f37dbc972f03"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "oceans"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Keywords"
+          }
+        },
+        {
+          "Container": {
+            "type": "literal",
+            "value": ""
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": ""
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "OCEANS"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "https://gcmd.earthdata.nasa.gov/kms/concept/91697b7d-8f2b-4954-850e-61d5f61c867d"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "oceans"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Keywords"
+          }
+        },
+        {
+          "Container": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/L05/current/"
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": "SeaDataNet device categories"
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "SDN:L05::124"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/L05/current/124/"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "SDN\\:L05\\:\\:124"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Instrument"
+          }
+        },
+        {
+          "Container": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/L05/current/"
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": "SeaDataNet device categories"
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "SDN:L05::130"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/L05/current/130/"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "SDN\\:L05\\:\\:130"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Instrument"
+          }
+        },
+        {
+          "Container": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/L05/current/"
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": "SeaDataNet device categories"
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "SDN:L05::124"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/L05/current/124/"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match (Identifiers)"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "SDN\\:L05\\:\\:124"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Instrument"
+          }
+        },
+        {
+          "Container": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/L05/current/"
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": "SeaDataNet device categories"
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "SDN:L05::130"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/L05/current/130/"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match (Identifiers)"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "SDN\\:L05\\:\\:130"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Instrument"
+          }
+        },
+        {
+          "Container": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/L05/current/"
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": "SeaDataNet device categories"
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "SDN:L05::30"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/L05/current/30/"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match (Identifiers)"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "SDN\\:L05\\:\\:30"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Instrument"
+          }
+        },
+        {
+          "Container": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/P02/current/"
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": "SeaDataNet Parameter Discovery Vocabulary"
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "Chlorophyll pigment concentrations in water bodies"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/P02/current/CPWC/"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "chlorophyll pigment concentrations in water bodies"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Variable"
+          }
+        },
+        {
+          "Container": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/P02/current/"
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": "SeaDataNet Parameter Discovery Vocabulary"
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "SDN:P02::NTOT"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/P02/current/NTOT/"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match (Identifiers)"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "SDN\\:P02\\:\\:NTOT"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Variable"
+          }
+        },
+        {
+          "Container": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/P02/current/"
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": "SeaDataNet Parameter Discovery Vocabulary"
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "SDN:P02::NTRI"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/P02/current/NTRI/"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match (Identifiers)"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "SDN\\:P02\\:\\:NTRI"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Variable"
+          }
+        },
+        {
+          "Container": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/P02/current/"
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": "SeaDataNet Parameter Discovery Vocabulary"
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "SDN:P02::TDPX"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/P02/current/TDPX/"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match (Identifiers)"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "SDN\\:P02\\:\\:TDPX"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Variable"
+          }
+        },
+        {
+          "Container": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/P02/current/"
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": "SeaDataNet Parameter Discovery Vocabulary"
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "SDN:P02::PHOS"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/P02/current/PHOS/"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match (Identifiers)"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "SDN\\:P02\\:\\:PHOS"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Variable"
+          }
+        },
+        {
+          "Container": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/P02/current/"
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": "SeaDataNet Parameter Discovery Vocabulary"
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "SDN:P02::TDNT"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/P02/current/TDNT/"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match (Identifiers)"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "SDN\\:P02\\:\\:TDNT"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Variable"
+          }
+        },
+        {
+          "Container": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/L06/current/"
+          },
+          "ContainerLabel": {
+            "type": "literal",
+            "value": "SeaVoX Platform Categories"
+          },
+          "MatchProperty": {
+            "type": "literal",
+            "value": "preferred label",
+            "xml:lang": "en"
+          },
+          "MatchTerm": {
+            "type": "literal",
+            "value": "SDN:L06::0"
+          },
+          "MatchURI": {
+            "type": "uri",
+            "value": "http://vocab.nerc.ac.uk/collection/L06/current/0/"
+          },
+          "Method": {
+            "type": "literal",
+            "value": "Exact Match (Identifiers)"
+          },
+          "SearchTerm": {
+            "type": "literal",
+            "value": "SDN\\:L06\\:\\:0"
+          },
+          "TargetElement": {
+            "type": "literal",
+            "value": "Platform"
+          }
+        }
+      ]
+    }
+  }
+}
