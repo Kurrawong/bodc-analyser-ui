@@ -175,7 +175,7 @@ function displayTable(responseData) {
 
     document.getElementById('table-output').innerHTML = Object.keys(responseData).map(key => `<div><h2>${key in xmlMap ? xmlMap[key] : key}</h2><div class="tbl" id="tbl_${key.hashCode()}"></div></div>`).join('');
 
-    const columnsToHide = ["TargetElement", "ExactMatch", "Container", "Collection"];
+    const columnsToHide = ["TargetElement", "ExactMatch", "Container", "ContainerLabel"];
 
     Object.keys(responseData).forEach(key => {
         const tableData = responseData[key];
@@ -213,12 +213,14 @@ function displayTable(responseData) {
                     title: 'Collection',
                     field: col,
                     width: 200,
-                    mutator: (value) => {
-                        if (value.value && value.value.trim() !== "") {
-                            return "Collection: " + value.value;
-                        } else {
-                            return "Collection: Unknown";
-                        }
+                    formatter: "link",
+                    formatterParams: {
+                        label: (cell) => {
+                            const value = cell.getData().ContainerLabel.value;
+                            return value && value.trim() !== "" ? value : "Unknown";
+                        },
+                        url: (cell) => cell.getData().Container,
+                        target: "_blank",
                     },
                     visible: !isColumnHidden
                 });
@@ -234,15 +236,27 @@ function displayTable(responseData) {
         });
 
         const table = new Tabulator("#tbl_" + key.hashCode(), {
-            height:"100%",
+            height: "100%",
             data: data,
             columns: [...metadataElementColumns, ...otherColumns],
-            groupBy: ["TargetElement", "ExactMatch", "ContainerLabel"],
-            groupOrder: "asc",
-            groupHeader: function (value, count, data, group) {
-                if (group.field === "ExactMatch") {
-                    return data; // Directly use the value "Exact Match" or "Wildcard Match"
+            groupBy: [
+                "TargetElement",
+                "ExactMatch",
+                function (data) {
+                    return data.ContainerLabel ? data.ContainerLabel.value : "Unknown";
                 }
+            ],
+            groupHeader: function (value, count, data, group) {
+                const field = group.getField();
+                if (data[0] && data[0].ContainerLabel && data[0].ContainerLabel.value === value) {
+                    const url = data[0].Container;
+                    const label = value !== "" ? value : "Collection: Unknown";
+                    if (value === "") {
+                        return label + "<span style='color:#d00; margin-left:10px;'>(" + count + " items)</span>";
+                    }
+                    return `<a href="${url}" target="_blank">${label}</a> <span style='color:#d00; margin-left:10px;'>(${count} items)</span>`;
+                }
+
                 return value + "<span style='color:#d00; margin-left:10px;'>(" + count + " items)</span>";
             },
             groupStartOpen: (value, count, data, group) => {
