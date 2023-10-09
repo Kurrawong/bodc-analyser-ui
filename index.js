@@ -311,24 +311,17 @@ function updateFileStatus(ids) {
                 '<span><small><em>(' + fileContent.length.toString() + ' bytes)</em></small></span>');
 
             let url = `https://gs-service-production.geodab.eu/gs-service/services/essi/csw?service=CSW&version=2.0.2&request=GetRecordById&id=${xid}&outputschema=http://www.isotc211.org/2005/gmi&elementSetName=full`;
+            let openButton = `<button onclick="window.open('${url}', '_blank')">View XML</button>`;
 
             return `<li>
                         <span class="fn">- ${fileName}</span> 
                         ${fileInfo}
+                        ${openButton}
                     </li>`;
         }).join('')}
         </ul>`;
     }
     document.getElementById('loadxml').innerHTML = content;
-
-    // Add event listener to openXML button to open the XML in a new tab
-    document.getElementById('openXML').addEventListener('click', function() {
-        if (ids.length > 0) {
-            let xid = Object.keys(xmlSelected)[0];  // Assuming you want to open the first XML. Adjust this as necessary.
-            let url = `https://gs-service-production.geodab.eu/gs-service/services/essi/csw?service=CSW&version=2.0.2&request=GetRecordById&id=${xid}&outputschema=http://www.isotc211.org/2005/gmi&elementSetName=full`;
-            window.open(url, '_blank');
-        }
-    });
 }
 
 
