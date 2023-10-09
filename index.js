@@ -265,12 +265,21 @@ function displayTable(responseData) {
                 switch (field) {
                     case "ExactMatch":
                         if (value === "Wildcard Match") {
-                            // Check if there's any data with an "Exact Match" value for ExactMatch in the group
+                            // Check if there's any data with an "Exact Match" or "URI Match" value for ExactMatch in the group
                             const parentGroup = group.getParentGroup();
                             if (parentGroup) {
                                 const siblingGroups = parentGroup.getSubGroups();
-                                if (siblingGroups.some(g => g.getKey() === "Exact Match")) {
-                                    return false; // Close "Wildcard Match" group if "Exact Match" exists
+                                if (siblingGroups.some(g => g.getKey() === "Exact Match" || g.getKey() === "URI Match")) {
+                                    return false; // Close "Wildcard Match" group if "Exact Match" or "URI Match" exists
+                                }
+                            }
+                        } else if (value === "Exact Match") {
+                            // Check if there's any data with a "URI Match" value for ExactMatch in the group
+                            const parentGroup = group.getParentGroup();
+                            if (parentGroup) {
+                                const siblingGroups = parentGroup.getSubGroups();
+                                if (siblingGroups.some(g => g.getKey() === "URI Match")) {
+                                    return false; // Close "Exact Match" group if "URI Match" exists
                                 }
                             }
                         }
@@ -294,15 +303,34 @@ let xmlMap = {};
 function updateFileStatus(ids) {
     let content = '';
     if (ids.length > 0) {
-        content += `<b>${ids.length} files selected:</b> <ul id="files-selected">${Object.keys(xmlSelected).map(xid => `
-            <li><span class="fn">- ${xid in xmlMap ? xmlMap[xid] : xid}</span> 
-            ${xmlSelected[xid] === undefined ? '' : (xmlSelected[xid] === '' ?
-            '<span style="width:100px;margin:0;" class="progress"><span class="indeterminate"/></span>' : '<span><small><em>(' + (xmlSelected[xid].length).toString() + ' bytes)</em></small></span>')}
-            </li>`).join('')}
+        content += `<b>${ids.length} files selected:</b> <ul id="files-selected">${Object.keys(xmlSelected).map(xid => {
+            let fileContent = xmlSelected[xid];
+            let fileName = xid in xmlMap ? xmlMap[xid] : xid;
+            let fileInfo = fileContent === undefined ? '' : (fileContent === '' ?
+                '<span style="width:100px;margin:0;" class="progress"><span class="indeterminate"/></span>' : 
+                '<span><small><em>(' + fileContent.length.toString() + ' bytes)</em></small></span>');
+
+            let url = `https://gs-service-production.geodab.eu/gs-service/services/essi/csw?service=CSW&version=2.0.2&request=GetRecordById&id=${xid}&outputschema=http://www.isotc211.org/2005/gmi&elementSetName=full`;
+
+            return `<li>
+                        <span class="fn">- ${fileName}</span> 
+                        ${fileInfo}
+                    </li>`;
+        }).join('')}
         </ul>`;
     }
     document.getElementById('loadxml').innerHTML = content;
+
+    // Add event listener to openXML button to open the XML in a new tab
+    document.getElementById('openXML').addEventListener('click', function() {
+        if (ids.length > 0) {
+            let xid = Object.keys(xmlSelected)[0];  // Assuming you want to open the first XML. Adjust this as necessary.
+            let url = `https://gs-service-production.geodab.eu/gs-service/services/essi/csw?service=CSW&version=2.0.2&request=GetRecordById&id=${xid}&outputschema=http://www.isotc211.org/2005/gmi&elementSetName=full`;
+            window.open(url, '_blank');
+        }
+    });
 }
+
 
 
 const getHtml = async () => {
