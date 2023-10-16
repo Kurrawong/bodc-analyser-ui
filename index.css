@@ -238,7 +238,3 @@ table.popup-table .tbl-value {
     overflow-y: auto;
     overflow-x: hidden;
 }
-
-#table-output {
-    height: 1000px; /* You can adjust this to your desired height */
-}

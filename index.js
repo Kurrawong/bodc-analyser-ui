@@ -175,126 +175,137 @@ function displayTable(responseData) {
 
     document.getElementById('table-output').innerHTML = Object.keys(responseData).map(key => `<div><h2>${key in xmlMap ? xmlMap[key] : key}</h2><div class="tbl" id="tbl_${key.hashCode()}"></div></div>`).join('');
 
-    const columnsToHide = ["TargetElement", "ExactMatch", "Container", "ContainerLabel"];
+    const columnsToHide = ["TargetElement", "MethodSubType", "Container", "ContainerLabel"];
 
     Object.keys(responseData).forEach(key => {
-        const tableData = responseData[key];
-        const data = tableData.results.bindings;
-        const columns = tableData.head.vars;
+            const tableData = responseData[key];
+            const data = tableData.results.bindings;
+            const columns = tableData.head.vars;
 
-        let metadataElementColumns = [];
-        let otherColumns = [];
+            let metadataElementColumns = [];
+            let otherColumns = [];
 
-        columns.forEach(col => {
-            const isColumnHidden = columnsToHide.includes(col);
+            columns.forEach(col => {
+                const isColumnHidden = columnsToHide.includes(col);
 
-            if (col === 'TargetElement') {
-                metadataElementColumns.push({
-                    title: 'TargetElement',
-                    field: 'TargetElement',
-                    mutator: (value) => value.value,
-                    visible: !isColumnHidden
-                });
-            } else if (col === 'MatchURI') {
-                otherColumns.push({
-                    title: "Match Concept",
-                    field: col,
-                    width: 200,
-                    formatter: "link",
-                    formatterParams: {
-                        label: (cell) => cell.getData().MatchTerm.value,
-                        url: (cell) => cell.getData().MatchURI.value,
-                        target: "_blank",
-                    },
-                    visible: !isColumnHidden
-                });
-            } else if (col === 'ContainerLabel') {
-                otherColumns.push({
-                    title: 'Collection',
-                    field: col,
-                    width: 200,
-                    formatter: "link",
-                    formatterParams: {
-                        label: (cell) => {
-                            const value = cell.getData().ContainerLabel.value;
-                            return value && value.trim() !== "" ? value : "Unknown";
+                if (col === 'TargetElement') {
+                    metadataElementColumns.push({
+                        title: 'TargetElement',
+                        field: 'TargetElement',
+                        mutator: (value) => value.value,
+                        visible: !isColumnHidden
+                    });
+                } else if (col === 'MatchURI') {
+                    otherColumns.push({
+                        title: "Match Concept",
+                        field: col,
+                        width: "45%",
+                        formatter: "link",
+                        formatterParams: {
+                            label: (cell) => cell.getData().MatchTerm.value,
+                            url: (cell) => cell.getData().MatchURI.value,
+                            target: "_blank",
                         },
-                        url: (cell) => cell.getData().Container,
-                        target: "_blank",
-                    },
-                    visible: !isColumnHidden
-                });
-            } else if (col !== 'MatchTerm') {
-                otherColumns.push({
-                    title: col,
-                    field: col,
-                    width: 200,
-                    mutator: (value) => value.value,
-                    visible: !isColumnHidden
-                });
-            }
-        });
-
-        const table = new Tabulator("#tbl_" + key.hashCode(), {
-            height: "100%",
-            data: data,
-            columns: [...metadataElementColumns, ...otherColumns],
-            groupBy: [
-                "TargetElement",
-                "ExactMatch",
-                function (data) {
-                    return data.ContainerLabel ? data.ContainerLabel.value : "Unknown";
+                        visible: !isColumnHidden
+                    });
+                } else if (col === 'ContainerLabel') {
+                    otherColumns.push({
+                        title: 'Collection',
+                        field: col,
+                        width: "12%",
+                        formatter: "link",
+                        formatterParams: {
+                            label: (cell) => {
+                                const value = cell.getData().ContainerLabel.value;
+                                return value && value.trim() !== "" ? value : "Unknown";
+                            },
+                            url: (cell) => cell.getData().Container,
+                            target: "_blank",
+                        },
+                        visible: !isColumnHidden
+                    });
+                } else if (col === 'SearchTerm') {
+                    otherColumns.push({
+                        title: col,
+                        field: col,
+                        width: "31%",
+                        mutator: (value) => value.value,
+                        visible: !isColumnHidden
+                    });
+                } else if (col !== 'MatchTerm') {
+                    otherColumns.push({
+                        title: col,
+                        field: col,
+                        width: "12%",
+                        mutator: (value) => value.value,
+                        visible: !isColumnHidden
+                    });
                 }
-            ],
-            groupHeader: function (value, count, data, group) {
-                const field = group.getField();
-                if (data[0] && data[0].ContainerLabel && data[0].ContainerLabel.value === value) {
-                    const url = data[0].Container;
-                    const label = value !== "" ? value : "Collection: Unknown";
-                    if (value === "") {
-                        return label + "<span style='color:#d00; margin-left:10px;'>(" + count + " items)</span>";
+            });
+
+            const methodSubTypeFormatter = function (cell, formatterParams, onRendered) {
+                // get cell value
+                const value = cell.getValue();
+
+                // check if value is "Fuzzy Match"
+                if (value === "Fuzzy Match") {
+                    cell.getElement().setAttribute('title', 'Your tooltip text here'); // set tooltip
+                }
+
+                return value; // return the value to be displayed in the
+            };
+
+
+            const table = new Tabulator("#tbl_" + key.hashCode(), {
+                data: data,
+                columns: [...metadataElementColumns, ...otherColumns],
+                groupBy: [
+                    "TargetElement",
+                    "MethodSubType",
+                    function (data) {
+                        return data.ContainerLabel ? data.ContainerLabel.value : "Unknown";
                     }
-                    return `<a href="${url}" target="_blank">${label}</a> <span style='color:#d00; margin-left:10px;'>(${count} items)</span>`;
-                }
+                ],
+                groupHeader: function (value, count, data, group) {
+                    const field = group.getField();
+                    const tooltips = {
+                        "Fuzzy Match": "Fuzzy Matches are only searched for when an Exact Match for a term is not found.",
+                        "Exact Match": "An Exact Match is where the search term exactly matches a term in the Knowledge Base",
+                    };
 
-                return value + "<span style='color:#d00; margin-left:10px;'>(" + count + " items)</span>";
-            },
-            groupStartOpen: (value, count, data, group) => {
-                const field = group.getField();
+                    let tooltipText = tooltips[value] ? `title="${tooltips[value]}"` : "";
 
-                switch (field) {
-                    case "ExactMatch":
-                        if (value === "Wildcard Match") {
-                            // Check if there's any data with an "Exact Match" or "URI Match" value for ExactMatch in the group
-                            const parentGroup = group.getParentGroup();
-                            if (parentGroup) {
-                                const siblingGroups = parentGroup.getSubGroups();
-                                if (siblingGroups.some(g => g.getKey() === "Exact Match" || g.getKey() === "URI Match")) {
-                                    return false; // Close "Wildcard Match" group if "Exact Match" or "URI Match" exists
-                                }
-                            }
-                        } else if (value === "Exact Match") {
-                            // Check if there's any data with a "URI Match" value for ExactMatch in the group
-                            const parentGroup = group.getParentGroup();
-                            if (parentGroup) {
-                                const siblingGroups = parentGroup.getSubGroups();
-                                if (siblingGroups.some(g => g.getKey() === "URI Match")) {
-                                    return false; // Close "Exact Match" group if "URI Match" exists
-                                }
-                            }
+                    if (data[0] && data[0].ContainerLabel && data[0].ContainerLabel.value === value) {
+                        const url = data[0].Container;
+                        const label = value !== "" ? value : "Collection: Unknown";
+                        if (value === "") {
+                            return `<span ${tooltipText} style='color:#000000'>${label}</span><span style='color:#d00; margin-left:10px;'>(${count} items)</span>`;
                         }
-                        return true; // Default open for "Exact Match"
-                    case "TargetElement":
-                    case "ContainerLabel":
-                    default:
-                        return true; // Default open for all other groups
+                        return `<a href="${url}" target="_blank">${label}</a> <span style='color:#d00; margin-left:10px;'>(${count} items)</span>`;
+                    }
+
+                    return `<span ${tooltipText} style='color:#000000'>${value}</span><span style='color:#d00; margin-left:10px;'>(${count} items)</span>`;
+                },
+
+
+                groupStartOpen: (value, count, data, group) => {
+                    const field = group.getField();
+
+                    // Open the group if the field is 'TargetElement'
+                    if (field === "TargetElement") {
+                        return true;
+                    }
+
+                    // Otherwise, keep the group closed
+                    return false;
                 }
-            }
 
-        });
-    });
+
+            });
+        }
+    )
+    ;
 }
-
 
 let xmlResponses = {};
 let xmlSelected = {};
@@ -307,7 +318,7 @@ function updateFileStatus(ids) {
             let fileContent = xmlSelected[xid];
             let fileName = xid in xmlMap ? xmlMap[xid] : xid;
             let fileInfo = fileContent === undefined ? '' : (fileContent === '' ?
-                '<span style="width:100px;margin:0;" class="progress"><span class="indeterminate"/></span>' : 
+                '<span style="width:100px;margin:0;" class="progress"><span class="indeterminate"/></span>' :
                 '<span><small><em>(' + fileContent.length.toString() + ' bytes)</em></small></span>');
 
             let url = `https://gs-service-production.geodab.eu/gs-service/services/essi/csw?service=CSW&version=2.0.2&request=GetRecordById&id=${xid}&outputschema=http://www.isotc211.org/2005/gmi&elementSetName=full`;
@@ -323,7 +334,6 @@ function updateFileStatus(ids) {
     }
     document.getElementById('loadxml').innerHTML = content;
 }
-
 
 
 const getHtml = async () => {
