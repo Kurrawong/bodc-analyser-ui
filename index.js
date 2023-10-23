@@ -112,7 +112,7 @@ document.getElementById('nextButton').addEventListener('click', () => {
 
 function debounce(func, delay) {
     let debounceTimer;
-    return function() {
+    return function () {
         const context = this;
         const args = arguments;
         clearTimeout(debounceTimer);
@@ -161,7 +161,7 @@ const analyser = async () => {
         const url = document.getElementById('endpoint').value;
         const analyserURL = `${url}/process-metadata`;
         const xmlfile = document.getElementById('currentFile')?.getAttribute('href');
-        const threshold =  1.0 //document.getElementById('threshold').value;
+        const threshold = 1.0 //document.getElementById('threshold').value;
 
         if (analyserURL == '') {
             throw new Error('Enter an analyser endpoint url');
@@ -235,14 +235,24 @@ function displayTable(responseData) {
     const columnsToHide = ["TargetElement", "MethodSubType", "Container", "ContainerLabel"];
 
     // Iterating over documents.
-    Object.keys(responseData).forEach(documentKey => {
+    for (const documentKey of Object.keys(responseData)) {
         const documentData = responseData[documentKey];
 
-        // Iterating over methods within each document.
-        Object.keys(documentData).forEach(methodKey => {
+// Iterating over methods within each document.
+        for (const methodKey of Object.keys(documentData)) {
             const methodData = documentData[methodKey];
             const data = methodData.results.bindings;
             const columns = methodData.head.vars;
+
+            // Check if the data array is empty
+            if (data.length === 0) {
+                // Get the specific container where you want to display the message
+                const container = document.getElementById(`tbl_${(documentKey + methodKey).hashCode()}`);
+
+                // Set the message in the specific container
+                container.innerHTML = `<p><i>No results found for method: ${methodKey}</i></p>`;
+                continue; // skip this iteration and continue with the next one
+            }
 
             let metadataElementColumns = [];
             let otherColumns = [];
@@ -361,11 +371,9 @@ function displayTable(responseData) {
                     // Otherwise, keep the group closed
                     return false;
                 }
-
-
             });
-        });
-    });
+        }
+    }
 }
 
 let xmlResponses = {};
