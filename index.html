@@ -46,16 +46,17 @@
                         <div class="input-field col s8">
                             <input placeholder="Enter URI" value="" id="endpoint" type="text" class="validate">
                             <label for="endpoint">Analyser Endpoint</label>
+                            <div id="available-methods"></div>
                         </div>
-                        <div class="input-field col s2">
-                            <select id="threshold">
-                            <option value="" disabled>Select</option>
-                            <option selected value="1">1</option>
-                            <option value="0.9">0.9</option>
-                            <option value="0.8">0.8</option>
-                            </select>
-                            <label>Threshold</label>
-                        </div>
+<!--                        <div class="input-field col s2">-->
+<!--                            <select id="threshold">-->
+<!--                            <option value="" disabled>Select</option>-->
+<!--                            <option selected value="1">1</option>-->
+<!--                            <option value="0.9">0.9</option>-->
+<!--                            <option value="0.8">0.8</option>-->
+<!--                            </select>-->
+<!--                            <label>Threshold</label>-->
+<!--                        </div>-->
                     </div>
                     <button type="button" id="analyse" class="btn">Analyse metadata</button> &nbsp; <a style="display:none;" id="alink" href="#" target="_new">(view)</a>
                 </form>

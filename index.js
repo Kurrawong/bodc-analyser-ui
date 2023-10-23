@@ -110,13 +110,60 @@ document.getElementById('nextButton').addEventListener('click', () => {
 });
 
 
+function debounce(func, delay) {
+    let debounceTimer;
+    return function() {
+        const context = this;
+        const args = arguments;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    };
+}
+
+const fetchAvailableMethods = async () => {
+    try {
+        const url = document.getElementById('endpoint').value;
+        const response = await fetch(`${url}/available-methods`);
+        const data = await response.json();
+
+        // Assuming data.methods is an array of method names
+        const methodsContainer = document.getElementById('available-methods');
+        methodsContainer.innerHTML = ""; // Clear previous checkboxes
+
+        data.forEach((method, index) => {
+            const checkboxId = `method_${index}`;
+
+            const checkboxElement = document.createElement('input');
+            checkboxElement.type = 'checkbox';
+            checkboxElement.id = checkboxId;
+            checkboxElement.value = method;
+
+            const labelElement = document.createElement('label');
+            labelElement.htmlFor = checkboxId;
+            labelElement.textContent = method;
+
+            // Append the checkbox and label to the container
+            methodsContainer.appendChild(checkboxElement);
+            methodsContainer.appendChild(labelElement);
+            methodsContainer.appendChild(document.createElement('br')); // line break for better readability
+        });
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+// Adding event listener to the URL input field
+document.getElementById('endpoint').addEventListener('input', debounce(fetchAvailableMethods, 500));
+
+
 const analyser = async () => {
     try {
         const url = document.getElementById('endpoint').value;
+        const analyserURL = `${url}/process-metadata`;
         const xmlfile = document.getElementById('currentFile')?.getAttribute('href');
-        const threshold = document.getElementById('threshold').value;
+        const threshold =  1.0 //document.getElementById('threshold').value;
 
-        if (url == '') {
+        if (analyserURL == '') {
             throw new Error('Enter an analyser endpoint url');
         }
         if (Object.keys(xmlSelected) == 0) {
@@ -138,7 +185,7 @@ const analyser = async () => {
         if (useSampleFile != '') {
             response = await fetch(useSampleFile, {method: 'GET'});
         } else {
-            response = await fetch(url, {
+            response = await fetch(analyserURL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -173,14 +220,29 @@ String.prototype.hashCode = function () {
 function displayTable(responseData) {
     console.log("RESULTS", responseData);
 
-    document.getElementById('table-output').innerHTML = Object.keys(responseData).map(key => `<div><h2>${key in xmlMap ? xmlMap[key] : key}</h2><div class="tbl" id="tbl_${key.hashCode()}"></div></div>`).join('');
+    // Mapping each document key to a section with a header and a table.
+    document.getElementById('table-output').innerHTML = Object.keys(responseData).map(documentKey => {
+        const documentData = responseData[documentKey];
+        return `<div>
+                    <h2>XML Document: <b>${documentKey in xmlMap ? xmlMap[documentKey] : documentKey}</b></h2>
+                    ${Object.keys(documentData).map(methodKey => `
+                        <h2>Analyser Method: <b>${methodKey}</b></h2>
+                        <div class="tbl" id="tbl_${(documentKey + methodKey).hashCode()}"></div>
+                    `).join('')}
+                </div>`;
+    }).join('');
 
     const columnsToHide = ["TargetElement", "MethodSubType", "Container", "ContainerLabel"];
 
-    Object.keys(responseData).forEach(key => {
-            const tableData = responseData[key];
-            const data = tableData.results.bindings;
-            const columns = tableData.head.vars;
+    // Iterating over documents.
+    Object.keys(responseData).forEach(documentKey => {
+        const documentData = responseData[documentKey];
+
+        // Iterating over methods within each document.
+        Object.keys(documentData).forEach(methodKey => {
+            const methodData = documentData[methodKey];
+            const data = methodData.results.bindings;
+            const columns = methodData.head.vars;
 
             let metadataElementColumns = [];
             let otherColumns = [];
@@ -247,16 +309,16 @@ function displayTable(responseData) {
                 // get cell value
                 const value = cell.getValue();
 
-                // check if value is "Fuzzy Match"
-                if (value === "Fuzzy Match") {
+                // check if value is "Proximity Match"
+                if (value === "Proximity Match") {
                     cell.getElement().setAttribute('title', 'Your tooltip text here'); // set tooltip
                 }
 
                 return value; // return the value to be displayed in the
             };
-
-
-            const table = new Tabulator("#tbl_" + key.hashCode(), {
+            const tableId = `tbl_${(documentKey + methodKey).hashCode()}`;
+            // const table = new Tabulator("#tbl_" + key.hashCode(), {
+            const table = new Tabulator(`#${tableId}`, {
                 data: data,
                 columns: [...metadataElementColumns, ...otherColumns],
                 groupBy: [
@@ -269,7 +331,7 @@ function displayTable(responseData) {
                 groupHeader: function (value, count, data, group) {
                     const field = group.getField();
                     const tooltips = {
-                        "Fuzzy Match": "Fuzzy Matches are only searched for when an Exact Match for a term is not found.",
+                        "Proximity Match": "Proximity Matches are only searched for when an Exact Match for a term is not found.",
                         "Exact Match": "An Exact Match is where the search term exactly matches a term in the Knowledge Base",
                     };
 
@@ -302,9 +364,8 @@ function displayTable(responseData) {
 
 
             });
-        }
-    )
-    ;
+        });
+    });
 }
 
 let xmlResponses = {};
