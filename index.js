@@ -271,7 +271,7 @@ function displayTable(responseData) {
                     otherColumns.push({
                         title: "Match Concept",
                         field: col,
-                        width: "45%",
+                        width: "35%",
                         formatter: "link",
                         formatterParams: {
                             label: (cell) => cell.getData().MatchTerm.value,
@@ -300,9 +300,16 @@ function displayTable(responseData) {
                     otherColumns.push({
                         title: col,
                         field: col,
-                        width: "31%",
+                        width: "28%",
                         mutator: (value) => value.value,
                         visible: !isColumnHidden
+                    });
+                } else if (col === 'Categories') {
+                    otherColumns.push({
+                        title: "Vocab Categories",
+                        field: col,
+                        width: "13%",
+                        mutator: (value) => value ? value.value : null, // Handles null values                        visible: !isColumnHidden
                     });
                 } else if (col !== 'MatchTerm') {
                     otherColumns.push({
