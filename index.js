@@ -1,5 +1,5 @@
-const useSampleFile = ''
 
+const useSampleFile = ''
 // const useSampleFile = './2023-10-03_sample_response.json'
 
 function setElementHeightToFillScreen(elementId) {
@@ -120,46 +120,78 @@ function debounce(func, delay) {
     };
 }
 
-const fetchAvailableMethods = async () => {
+const fetchConfig = async() => {
     try {
         const url = document.getElementById('endpoint').value;
-        const response = await fetch(`${url}/available-methods`);
+        const response = await fetch(`${url}/config`);
         const data = await response.json();
-
-        // Assuming data.methods is an array of method names
-        const methodsContainer = document.getElementById('available-methods');
-        methodsContainer.innerHTML = ""; // Clear previous checkboxes
-
-        data.forEach((method, index) => {
-            const checkboxId = `method_${index}`;
-
-            const checkboxElement = document.createElement('input');
-            checkboxElement.type = 'checkbox';
-            checkboxElement.id = checkboxId;
-            checkboxElement.value = method;
-
-            const labelElement = document.createElement('label');
-            labelElement.htmlFor = checkboxId;
-            labelElement.textContent = method;
-
-            // Append the checkbox and label to the container
-            methodsContainer.appendChild(checkboxElement);
-            methodsContainer.appendChild(labelElement);
-            methodsContainer.appendChild(document.createElement('br')); // line break for better readability
-        });
-    } catch (error) {
-        console.error(error);
+        return data;
+    } catch (ex) {
+        console.log(ex);
     }
+    return {};
+}
+
+const buildConfigOptions = async() => {
+    const config = await fetchConfig();
+
+    // Assuming data.methods is an array of method names
+    const optionsContainer = document.getElementById('config-options');
+    
+    let str = '';
+    Object.keys(config).forEach(optionName=>{
+        const option = config[optionName];
+        str+= `<div><b>${optionName}</b></div>` +
+            Object.keys(option).map(optionLink=>{
+                return `
+                    <label>
+                        <input
+                            class="filled-in"
+                            data-parent="${optionName}" 
+                            value="${optionLink}" type="checkbox" />
+                        <span>${option[optionLink]}</span>
+                    </label>`
+            }).join('')
+    })
+    optionsContainer.innerHTML = str;
+
+}
+
+const getConfig = () => {
+    const optionsContainer = document.getElementById('config-options');
+    const checkboxes = optionsContainer.querySelectorAll('input[type="checkbox"]:checked');
+
+    const selectedOptions = {};
+
+    checkboxes.forEach(checkbox => {
+        const parent = checkbox.getAttribute('data-parent');
+        const value = checkbox.value;
+
+        if (!selectedOptions[parent]) {
+            selectedOptions[parent] = [];
+        }
+
+        selectedOptions[parent].push(value);
+    });
+
+    const urlParams = new URLSearchParams();
+
+    for (const key of Object.keys(selectedOptions)) {
+        urlParams.append(key, selectedOptions[key].join(','));
+    }
+
+    return '?' + urlParams.toString();
 };
 
 // Adding event listener to the URL input field
-document.getElementById('endpoint').addEventListener('input', debounce(fetchAvailableMethods, 500));
-
+document.getElementById('endpoint').addEventListener('input', debounce(buildConfigOptions, 500));
 
 const analyser = async () => {
     try {
         const url = document.getElementById('endpoint').value;
-        const analyserURL = `${url}/process-metadata`;
+        const configParams = getConfig();
+        const analyserURL = `${url}/process-metadata${configParams}`;
+
         const xmlfile = document.getElementById('currentFile')?.getAttribute('href');
         const threshold = 1.0 //document.getElementById('threshold').value;
 
@@ -438,6 +470,7 @@ const init = async () => {
     const endpointParam = urlParams.get('endpoint');
     if (endpointParam) {
         document.getElementById('endpoint').value = endpointParam;
+        await buildConfigOptions();
     }
 
     document.addEventListener('DOMContentLoaded', function () {

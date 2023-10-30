@@ -1,0 +1,12 @@
+{
+    "methods": 
+    {
+        "xml": "Structured XML Extraction" ,         
+        "full": "Full XML Extraction"
+    },
+    "themes":
+    {
+        "one": "Theme one",
+        "two": "Theme two"
+    }
+}

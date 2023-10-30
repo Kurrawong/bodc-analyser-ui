@@ -43,10 +43,9 @@
                         <div class="card-title">Analyser</div>
                     </div>
                     <div class="row">
-                        <div class="input-field col s8">
+                        <div class="input-field col s12">
                             <input placeholder="Enter URI" value="" id="endpoint" type="text" class="validate">
                             <label for="endpoint">Analyser Endpoint</label>
-                            <div id="available-methods"></div>
                         </div>
 <!--                        <div class="input-field col s2">-->
 <!--                            <select id="threshold">-->
@@ -57,6 +56,11 @@
 <!--                            </select>-->
 <!--                            <label>Threshold</label>-->
 <!--                        </div>-->
+                    </div>
+                    <div class="row">
+                        <div class="col s12">
+                            <div id="config-options"></div>
+                        </div>
                     </div>
                     <button type="button" id="analyse" class="btn">Analyse metadata</button> &nbsp; <a style="display:none;" id="alink" href="#" target="_new">(view)</a>
                 </form>
