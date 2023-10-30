@@ -79,7 +79,7 @@ const updatePaginationControls = () => {
 };
 
 const loadResults = async () => {
-    checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes = document.querySelectorAll('input[type="checkbox"][data-group="datasets"]');
     currentIds = [];
     checkboxes.forEach(function (checkbox) {
         if (checkbox.checked) {
@@ -137,7 +137,7 @@ const buildConfigOptions = async() => {
 
     // Assuming data.methods is an array of method names
     const optionsContainer = document.getElementById('config-options');
-    
+
     let str = '';
     Object.keys(config).forEach(optionName=>{
         const option = config[optionName];
@@ -148,7 +148,11 @@ const buildConfigOptions = async() => {
                         <input
                             class="filled-in"
                             data-parent="${optionName}" 
-                            value="${optionLink}" type="checkbox" />
+                            value="${optionLink}"
+                            checked="checked"
+                            type="checkbox"
+                            data-group="config-options"
+                            />
                         <span>${option[optionLink]}</span>
                     </label>`
             }).join('')
@@ -199,7 +203,7 @@ const analyser = async () => {
             throw new Error('Enter an analyser endpoint url');
         }
         if (Object.keys(xmlSelected) == 0) {
-            throw new Error('Select a result to view');
+            throw new Error('Select a metadata record to analyse');
         }
         if (threshold == '') {
             throw new Error('Select a threshold');
@@ -360,7 +364,7 @@ function displayTable(responseData) {
 
                 // check if value is "Proximity Match"
                 if (value === "Proximity Match") {
-                    cell.getElement().setAttribute('title', 'Your tooltip text here'); // set tooltip
+                    cell.getElement().setAttribute('title', 'Search terms within N characters of each other');
                 }
 
                 return value; // return the value to be displayed in the
@@ -493,7 +497,9 @@ const init = async () => {
                             data-group="datasets"
                             data-meta="${JSON.stringify(dataset)}"
                             class="filled-in" ${dataset.title.match(/SeaDataNet/) ? 'checked' : ''} 
-                            value="${dataset.id}" type="checkbox" />
+                            value="${dataset.id}"
+                            type="checkbox" 
+                            />
                         <span>${dataset.title}</span>
                     </label>
                 `).join('');
