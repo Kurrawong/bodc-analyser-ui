@@ -1,5 +1,5 @@
-
 const useSampleFile = ''
+
 // const useSampleFile = './2023-10-03_sample_response.json'
 
 function setElementHeightToFillScreen(elementId) {
@@ -120,7 +120,7 @@ function debounce(func, delay) {
     };
 }
 
-const fetchConfig = async() => {
+const fetchConfig = async () => {
     try {
         const url = document.getElementById('endpoint').value;
         const response = await fetch(`${url}/config`);
@@ -132,17 +132,17 @@ const fetchConfig = async() => {
     return {};
 }
 
-const buildConfigOptions = async() => {
+const buildConfigOptions = async () => {
     const config = await fetchConfig();
 
     // Assuming data.methods is an array of method names
     const optionsContainer = document.getElementById('config-options');
 
     let str = '';
-    Object.keys(config).forEach(optionName=>{
+    Object.keys(config).forEach(optionName => {
         const option = config[optionName];
-        str+= `<div><b>${optionName}</b></div>` +
-            Object.keys(option).map(optionLink=>{
+        str += `<div><b>${optionName}</b></div>` +
+            Object.keys(option).map(optionLink => {
                 return `
                     <label>
                         <input
@@ -303,6 +303,14 @@ function displayTable(responseData) {
                         mutator: (value) => value.value,
                         visible: !isColumnHidden
                     });
+                } else if (col === 'SearchTerm') {
+                    otherColumns.push({
+                        title: col,
+                        field: col,
+                        width: "28%",
+                        mutator: (value) => value.value,
+                        visible: !isColumnHidden
+                    });
                 } else if (col === 'MatchURI') {
                     otherColumns.push({
                         title: "Match Concept",
@@ -332,14 +340,6 @@ function displayTable(responseData) {
                         },
                         visible: !isColumnHidden
                     });
-                } else if (col === 'SearchTerm') {
-                    otherColumns.push({
-                        title: col,
-                        field: col,
-                        width: "28%",
-                        mutator: (value) => value.value,
-                        visible: !isColumnHidden
-                    });
                 } else if (col === 'Categories') {
                     otherColumns.push({
                         title: "Vocab Categories",
@@ -352,7 +352,7 @@ function displayTable(responseData) {
                         title: col,
                         field: col,
                         width: "12%",
-                        mutator: (value) => value.value,
+                        mutator: (value) => value ? value.value : null,
                         visible: !isColumnHidden
                     });
                 }
