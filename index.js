@@ -143,20 +143,22 @@ const buildConfigOptions = async () => {
         const option = config[optionName];
         str += `<div><b>${optionName}</b></div>` +
             Object.keys(option).map(optionLink => {
+                // Check if the optionName is 'Themes'. If so, do not add the 'checked' attribute.
+                const isChecked = optionName !== 'Restrict to Themes' ? 'checked="checked"' : '';
                 return `
-                    <label>
-                        <input
-                            class="filled-in"
-                            data-parent="${optionName}" 
-                            value="${optionLink}"
-                            checked="checked"
-                            type="checkbox"
-                            data-group="config-options"
-                            />
-                        <span>${option[optionLink]}</span>
-                    </label>`
-            }).join('')
-    })
+                <label>
+                    <input
+                        class="filled-in"
+                        data-parent="${optionName}" 
+                        value="${optionLink}"
+                        ${isChecked}
+                        type="checkbox"
+                        data-group="config-options"
+                        />
+                    <span>${option[optionLink]}</span>
+                </label>`;
+            }).join('');
+    });
     optionsContainer.innerHTML = str;
 
 }
