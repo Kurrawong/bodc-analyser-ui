@@ -1,0 +1,4 @@
+.search-result-table, .search-result-table th, .search-result-table td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
