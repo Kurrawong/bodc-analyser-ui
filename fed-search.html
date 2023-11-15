@@ -2,17 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Semantic Analyser Federated Search</title>
-    <link rel="stylesheet" href="fed-search.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two Pane Layout</title>
+    <link rel="stylesheet" href="fed-search.css">
 </head>
 <body>
-<div>
-    <input type="text" id="searchTerm" placeholder="Enter search term...">
-    <button onclick="performSearch()">Search</button>
-</div>
-
-<div id="searchResults"></div>
+    <div class="container">
+        <div class="pane" id="left-search">
+            <h2>Bioportal Search</h2>
+            <div id="left-search-results"></div>
+        </div>
+        <div class="pane" id="right-search">
+            <h2>Earthportal Search</h2>
+            <div id="right-search-results"></div>
+        </div>
+    </div>
 <script src="fed-search.js"></script>
 </body>
 </html>
-

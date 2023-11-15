@@ -1,25 +1,51 @@
 // Set this flag to true for local development and false for production
-var isDevEnvironment = true;
+var isDevEnvironment = false;
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Call the performSearch function when the page content is fully loaded
+    performSearch();
+});
 
 function performSearch() {
+    // Check if it's a development environment
     if (isDevEnvironment) {
+        // Fetch local data for development environment
         fetch('./example-data/federated-search/bioportal-search-results.json')
             .then(response => response.json())
             .then(data => displayResults(data))
             .catch(error => console.error('Error fetching local data:', error));
     } else {
-        // Replace with your actual API URL and parameters
-        var apiUrl = 'https://data.bioontology.org/search?q=melanoma&apikey=YOUR_API_KEY';
+        // Extract 'q' parameter from the URL
+        const params = new URLSearchParams(window.location.search);
+        const searchTerm = params.get('q');
+        const earthPortalAPIKey = params.get('epapikey');
+        const bioPortalAPIKey = params.get('bpapikey');
 
-        fetch(apiUrl)
-            .then(response => response.json())
-            .then(data => displayResults(data))
-            .catch(error => console.error('Error fetching data from API:', error));
+        // Check if searchTerm is not null or empty
+        if (searchTerm) {
+            // API URLs
+            var apiUrl1 = `https://data.bioontology.org/search?q=${encodeURIComponent(searchTerm)}&apikey=${encodeURIComponent(bioPortalAPIKey)}`;
+            var apiUrl2 = `https://earthportal.eu:8443/search?q=${encodeURIComponent(searchTerm)}&apikey=${encodeURIComponent(earthPortalAPIKey)}`;
+            // Fetch from the first API
+            fetch(apiUrl1)
+                .then(response => response.json())
+                .then(data => displayResults(data, 'left-search-results')) // Display in left pane
+                .catch(error => console.error('Error fetching data from first API:', error));
+
+            // Fetch from the second API
+            fetch(apiUrl2)
+                .then(response => response.json())
+                .then(data => displayResults(data, 'right-search-results')) // Display in right pane
+                .catch(error => console.error('Error fetching data from second API:', error));
+        } else {
+            console.error('No search term provided');
+            // Handle the case where no search term is provided
+        }
     }
 }
 
-function displayResults(data) {
-    var resultsContainer = document.getElementById('searchResults');
+function displayResults(data, targetId) {
+    var resultsContainer = document.getElementById(targetId); // Use targetId to get the correct container
     resultsContainer.innerHTML = ''; // Clear existing results
 
     var table = document.createElement('table');
@@ -38,7 +64,7 @@ function displayResults(data) {
     resultsContainer.appendChild(table);
 }
 
-var propertiesToDisplay = ['semanticType', '@id', 'prefLabel', 'cui', 'semanticType', 'ontologyType'];
+var propertiesToDisplay = ['@id', 'prefLabel', 'cui', 'ontologyType'];
 
 function renderResult(item, index) {
     var fragment = document.createDocumentFragment();
@@ -85,4 +111,3 @@ function renderResult(item, index) {
 
     return fragment;
 }
-

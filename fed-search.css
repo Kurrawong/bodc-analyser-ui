@@ -1,4 +1,70 @@
-.search-result-table, .search-result-table th, .search-result-table td {
-    border: 1px solid black;
-    border-collapse: collapse;
+/* Basic Reset */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif; /* Material Design typically uses Roboto */
 }
+
+/* Container for the table - optional */
+.table-container {
+    margin: 20px;
+    overflow-x: auto; /* Useful if the table is wider than the viewport */
+}
+
+/* Styling the table */
+.search-result-table {
+    width: 100%;
+    border-collapse: collapse; /* Collapses the border */
+    box-shadow: 0 3px 15px rgba(0,0,0,0.2); /* Material Design-like shadow */
+}
+
+.search-result-table th,
+.search-result-table td {
+    text-align: left;
+    padding: 8px; /* Spacing within cells */
+    border-bottom: 1px solid #ddd; /* Light bottom border for each cell */
+}
+
+/* Header styles */
+.search-result-table th {
+    background-color: #00b4ff; /* Material Design purple */
+    color: white;
+    font-size: 16px;
+}
+
+/* Row hover effect */
+.search-result-table tr:hover {
+    background-color: #f1f1f1; /* Light grey background on hover */
+}
+
+/* Responsive adjustments can go here */
+@media (max-width: 600px) {
+    /* Adjustments for small screens */
+}
+
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh; /* Ensures that the container is at least as tall as the viewport */
+}
+
+.pane {
+    flex: 1; /* Each pane will take up equal space */
+    text-align: center;
+    padding: 20px;
+    overflow-y: auto; /* Adds scroll to each pane if content overflows */
+}
+
+/*#left-search {*/
+/*    background-color: lightblue;*/
+/*}*/
+
+/*#right-search {*/
+/*    background-color: lightyellow;*/
+/*}*/

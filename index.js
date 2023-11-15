@@ -307,12 +307,46 @@ function displayTable(responseData) {
                     });
                 } else if (col === 'SearchTerm') {
                     otherColumns.push({
-                        title: col,
-                        field: col,
-                        width: "28%",
-                        mutator: (value) => value.value,
-                        visible: !isColumnHidden
-                    });
+                            title: col,
+                            field: col,
+                            width: '28%',
+                            formatter: function (cell, formatterParams, onRendered) {
+                                // Get the value of the cell
+                                let value = cell.getValue().value;
+
+                                // Create a container div
+                                let container = document.createElement('div');
+
+                                // Create the text span
+                                let textSpan = document.createElement('span');
+                                textSpan.textContent = value;
+                                container.appendChild(textSpan);
+
+                                // Create a link element
+                                let link = document.createElement('a');
+                                link.href = 'fed-search.html?q=' + encodeURIComponent(value) +
+                                    '&epapikey=' + encodeURIComponent(earthPortalAPIKey) +
+                                    '&bpapikey=' + encodeURIComponent(bioPortalAPIKey);
+                                link.target = '_blank'; // Open in a new tab
+
+                                let img = document.createElement('img');
+                                img.src = 'external_search.png'; // Path to your logo image
+                                img.alt = 'Search';
+                                img.style.marginLeft = '5px'; // Add some space between the text and the image
+
+                                // Resize the image
+                                img.style.width = '20px';  // Set the width of the image
+                                img.style.height = '20px'; // Set the height of the image
+
+                                // Append the image to the link, then the link to the container
+                                link.appendChild(img);
+                                container.appendChild(link);
+
+                                return container;
+                            },
+                            visible: !isColumnHidden
+                        }
+                    );
                 } else if (col === 'MatchURI') {
                     otherColumns.push({
                         title: "Match Concept",
@@ -470,6 +504,9 @@ const getHtml = async () => {
     }
 }
 
+let earthPortalAPIKey = '';
+let bioPortalAPIKey = '';
+
 const init = async () => {
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -477,6 +514,16 @@ const init = async () => {
     if (endpointParam) {
         document.getElementById('endpoint').value = endpointParam;
         await buildConfigOptions();
+    }
+    const earthPortalAPIKeyParam = urlParams.get('epapikey');
+    if (earthPortalAPIKeyParam) {
+        document.getElementById('earthportal-api-key').value = earthPortalAPIKeyParam;
+        earthPortalAPIKey = earthPortalAPIKeyParam;
+    }
+    const bioPortalAPIKeyParam = urlParams.get('bpapikey');
+    if (bioPortalAPIKeyParam) {
+        document.getElementById('bioportal-api-key').value = bioPortalAPIKeyParam;
+        bioPortalAPIKey = bioPortalAPIKeyParam;
     }
 
     document.addEventListener('DOMContentLoaded', function () {
