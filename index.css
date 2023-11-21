@@ -238,3 +238,18 @@ table.popup-table .tbl-value {
     overflow-y: auto;
     overflow-x: hidden;
 }
+
+.collapsible-content {
+    display: none;
+    overflow: hidden;
+}
+
+.collapsible-content.active {
+    display: block;
+}
+
+.header-twistie {
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+}

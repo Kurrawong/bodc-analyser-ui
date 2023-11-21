@@ -234,6 +234,7 @@ const analyser = async () => {
 
         const data = await response.json();
 
+        displayTermsNotFound(data);
         displayTable(data);
 
     } catch (ex) {
@@ -454,6 +455,114 @@ function displayTable(responseData) {
         }
     }
 }
+
+function displayTermsNotFound(responseData) {
+    const termsNotFoundDiv = document.getElementById('terms-not-found');
+    termsNotFoundDiv.innerHTML = ''; // Clear previous content
+
+    const header = document.createElement('h2');
+    header.textContent = 'Terms not found - search in BioPortal and EarthPortal';
+    termsNotFoundDiv.appendChild(header);
+
+    // Create a span element for the +/- icon
+    const twistie = document.createElement('span');
+    twistie.className = 'header-twistie';
+    twistie.textContent = '+';
+    twistie.style.marginLeft = '10px'; // Space between text and icon
+
+    // Append the twistie to the header
+    header.appendChild(twistie);
+
+    header.addEventListener('click', function () {
+        collapsibleContainer.classList.toggle('active');
+        twistie.textContent = collapsibleContainer.classList.contains('active') ? '-' : '+';
+    });
+
+    // Create a twistie (collapsible) container
+    const collapsibleContainer = document.createElement('div');
+    collapsibleContainer.className = 'collapsible-content';
+
+    termsNotFoundDiv.appendChild(collapsibleContainer);
+
+    for (const documentKey of Object.keys(responseData)) {
+        const documentData = responseData[documentKey];
+
+        for (const methodKey of Object.keys(documentData)) {
+            const methodData = documentData[methodKey];
+
+            // Check if search_terms_not_found exists and is an array
+            if (Array.isArray(methodData.search_terms_not_found) && methodData.search_terms_not_found.length > 0) {
+                // Transform terms into a format suitable for Tabulator
+                let transformedTerms = [];
+                const termsPerRow = 5;
+                for (let i = 0; i < methodData.search_terms_not_found.length; i += termsPerRow) {
+                    let row = {};
+                    for (let j = 0; j < termsPerRow; j++) {
+                        if (i + j < methodData.search_terms_not_found.length) {
+                            row[`term${j + 1}`] = methodData.search_terms_not_found[i + j];
+                        }
+                    }
+                    transformedTerms.push(row);
+                }
+
+                // Define columns for the Tabulator table
+                // Define columns for the Tabulator table
+                let columns = [];
+                for (let i = 1; i <= termsPerRow; i++) {
+                    columns.push({
+                        title: `Term ${i}`,
+                        field: `term${i}`,
+                        formatter: function (cell, formatterParams, onRendered) {
+                            // cell - the cell component
+                            // formatterParams - parameters set for the column
+                            // onRendered - function to call when the formatter has been rendered
+
+                            let value = cell.getValue();
+
+                            // Create a link element
+                            let link = document.createElement('a');
+                            link.href = 'fed-search.html?q=' + encodeURIComponent(value) +
+                                '&epapikey=' + encodeURIComponent(earthPortalAPIKey) +
+                                '&bpapikey=' + encodeURIComponent(bioPortalAPIKey);
+                            link.target = '_blank'; // Open in a new tab
+                            link.textContent = value; // Set the link text
+
+                            let img = document.createElement('img');
+                            img.src = 'external_search.png'; // Path to your logo image
+                            img.alt = 'Search';
+                            img.style.marginLeft = '5px'; // Add some space between the text and the image
+
+                            // Resize the image
+                            img.style.width = '20px';  // Set the width of the image
+                            img.style.height = '20px'; // Set the height of the image
+
+                            // Append the image to the link, then the link to the container
+                            link.appendChild(img);
+
+                            return link;
+                        }
+                    });
+                }
+
+
+                // Create a container for each table
+                const tableContainerId = `tbl_${(documentKey).hashCode()}`;
+                // const tableContainerId = `terms-table-${documentKey}-${methodKey}`;
+                let tableContainer = document.createElement('div');
+                tableContainer.id = tableContainerId;
+                collapsibleContainer.appendChild(tableContainer);
+
+                // Create a Tabulator table
+                new Tabulator(`#${tableContainerId}`, {
+                    headerVisible: false,
+                    data: transformedTerms,
+                    columns: columns
+                });
+            }
+        }
+    }
+}
+
 
 let xmlResponses = {};
 let xmlSelected = {};
