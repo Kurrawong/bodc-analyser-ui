@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>BODC</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <!--Import Google Icon Font-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -11,19 +11,29 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="index.css"/>
     <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
+    <!-- jquery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
     <script>
         const module = {};
     </script>
 </head>
 <body>
-    <h1 id="title">British Oceanographic Data Centre</h1>
-    <div class="main-container">
-        <div class="sidebar">
+<h1 id="title">British Oceanographic Data Centre</h1>
+<div class="main-container">
+    <div class="row">
+        <div class="col s12">
+            <ul class="tabs">
+                <li class="tab col s6"><a class="active" href="#metadata">Metadata Sources</a></li>
+                <li class="tab col s6"><a href="#netcdf">Data Sources</a></li>
+            </ul>
+        </div>
+        <div id="metadata" class="sidebar">
             <blockquote id="about"></blockquote>
             <h2>Sources</h2>
-            <button id="toggleSelect" class="btn">Select All</button><br><br>
+            <button id="toggleSelect" class="btn">Select All</button>
+            <br><br>
             <div id="sources"></div>
             <button id="search" class="btn">Search</button>
             <h2>Results <span id="numResults"></span></h2>
@@ -31,55 +41,67 @@
             <button id="nextButton" class="btn">Next Page</button>
             <div id="results"></div>
         </div>
-        <div id="xml">
-            <div id="loadxml"></div>
-            <!-- <pre class="xml">
-                <span class="pre-label">xml</span>
-                <code id="xml-output" class="xml"></code>
-            </pre> -->
-            <div class="row card">
-                <form class="card-content col s12">
-                    <div class="row">
-                        <div class="card-title">Analyser</div>
-                    </div>
-                    <div class="row">
-                        <div class="input-field col s12">
-                            <input placeholder="Enter URI" value="" id="endpoint" type="text" class="validate">
-                            <label for="endpoint">Analyser Endpoint</label>
-                        </div>
-                        <div class="container col s12">
-                            <div class="input-field col s6">
-                                <input placeholder="Enter Bioportal API Key" value="" id="bioportal-api-key" type="text" class="validate">
-                                <label for="endpoint">Bioportal API Key</label>
-                            </div>
-                            <div class="input-field col s6">
-                                <input placeholder="Enter Earthportal API Key" value="" id="earthportal-api-key" type="text" class="validate">
-                                <label for="endpoint">Earthportal API Key</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col s12">
-                            <div id="config-options"></div>
-                        </div>
-                    </div>
-                    <button type="button" id="analyse" class="btn">Analyse metadata</button> &nbsp; <a style="display:none;" id="alink" href="#" target="_new">(view)</a>
-                </form>
-            </div>
-            <p><b>Analyser output</b></p>
-            <div id="terms-not-found"></div>
-            <div id="table-output"></div>
-
+        <div id="netcdf" class="sidebar">
+            <form method="post" enctype="multipart/form-data">
+                <label for="fileUpload">Select a netCDF file to upload:</label><br>
+                <input type="file" id="fileUpload" name="files" multiple><br><br>
+                <input type="submit" value="Upload Files" name="submit">
+            </form>
         </div>
     </div>
-    <!-- Compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mustache@4.2.0/mustache.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.0.0/jsonld.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xml2json-light@1.0.6/xml2json.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
-    <!-- Main application JS -->
-    <script src="index.js"></script>
+    <div id="xml">
+        <div id="loadxml"></div>
+        <!-- <pre class="xml">
+            <span class="pre-label">xml</span>
+            <code id="xml-output" class="xml"></code>
+        </pre> -->
+        <div class="row card">
+            <form class="card-content col s12">
+                <div class="row">
+                    <div class="card-title">Analyser</div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input placeholder="Enter URI" value="" id="endpoint" type="text" class="validate">
+                        <label for="endpoint">Analyser Endpoint</label>
+                    </div>
+                    <div class="container col s12">
+                        <div class="input-field col s6">
+                            <input placeholder="Enter Bioportal API Key" value="" id="bioportal-api-key" type="text"
+                                   class="validate">
+                            <label for="endpoint">Bioportal API Key</label>
+                        </div>
+                        <div class="input-field col s6">
+                            <input placeholder="Enter Earthportal API Key" value="" id="earthportal-api-key" type="text"
+                                   class="validate">
+                            <label for="endpoint">Earthportal API Key</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col s12">
+                        <div id="config-options"></div>
+                    </div>
+                </div>
+                <button type="button" id="analyse" class="btn">Analyse</button> &nbsp; <a style="display:none;"
+                                                                                                   id="alink" href="#"
+                                                                                                   target="_new">(view)</a>
+            </form>
+        </div>
+        <p><b>Analyser output</b></p>
+        <div id="terms-not-found"></div>
+        <div id="table-output"></div>
+
+    </div>
+</div>
+<!-- Compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mustache@4.2.0/mustache.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.0.0/jsonld.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xml2json-light@1.0.6/xml2json.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<!-- Main application JS -->
+<script src="index.js"></script>
 </body>
 </html>

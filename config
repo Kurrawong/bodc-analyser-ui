@@ -1,7 +1,7 @@
 {
     "methods": 
     {
-        "xml": "Structured XML Extraction" ,         
+        "xml": "Structured XML Extraction" ,
         "full": "Full XML Extraction"
     },
     "themes":

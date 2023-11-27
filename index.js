@@ -134,34 +134,57 @@ const fetchConfig = async () => {
 
 const buildConfigOptions = async () => {
     const config = await fetchConfig();
-
-    // Assuming data.methods is an array of method names
     const optionsContainer = document.getElementById('config-options');
 
     let str = '';
     Object.keys(config).forEach(optionName => {
         const option = config[optionName];
-        str += `<div><b>${optionName}</b></div>` +
-            Object.keys(option).map(optionLink => {
-                // Check if the optionName is 'Themes'. If so, do not add the 'checked' attribute.
-                const isChecked = optionName !== 'Restrict to Themes' ? 'checked="checked"' : '';
-                return `
-                <label>
-                    <input
-                        class="filled-in"
-                        data-parent="${optionName}" 
-                        value="${optionLink}"
-                        ${isChecked}
-                        type="checkbox"
-                        data-group="config-options"
-                        />
-                    <span>${option[optionLink]}</span>
-                </label>`;
-            }).join('');
-    });
-    optionsContainer.innerHTML = str;
 
-}
+        if (optionName === 'Methods') {
+            str += `<div><b>${optionName}</b></div>`;
+            Object.keys(option).forEach(subOptionName => {
+                const subOption = option[subOptionName];
+                str += `<div>${subOptionName}</div>`;
+                Object.keys(subOption).forEach(method => {
+                    const methodLabel = subOption[method];
+                    // No method is pre-checked
+                    str += `
+                        <label>
+                            <input
+                                class="filled-in"
+                                data-parent="${optionName}"
+                                value="${method}"
+                                type="checkbox"
+                                data-group="config-options"
+                                />
+                            <span>${methodLabel}</span>
+                        </label>`;
+                });
+            });
+        } else {
+            // For other options like 'Restrict to Themes'
+            str += `<div><b>${optionName}</b></div>` +
+                Object.keys(option).map(optionLink => {
+                    return `
+                    <label>
+                        <input
+                            class="filled-in"
+                            data-parent="${optionName}" 
+                            value="${optionLink}"
+                            type="checkbox"
+                            data-group="config-options"
+                            />
+                        <span>${option[optionLink]}</span>
+                    </label>`;
+                }).join('');
+        }
+    });
+
+    optionsContainer.innerHTML = str;
+};
+
+// Call this function initially and whenever the active tab changes
+buildConfigOptions('metadata');
 
 const getConfig = () => {
     const optionsContainer = document.getElementById('config-options');
@@ -242,6 +265,87 @@ const analyser = async () => {
         console.log(ex);
     }
 };
+
+// const analyser = async () => {
+//     try {
+//
+//         const url = document.getElementById('endpoint').value;
+//         let configParams = getConfig(); // This fetches the common config parameters
+//
+//         const files = document.getElementById('fileUpload').files;
+//
+//         const analyserURL = `${url}/process-metadata${configParams}`;
+//         document.getElementById('currentFile')?.getAttribute('href');
+//
+//         const xmlfile = document.getElementById('currentFile')?.getAttribute('href');
+//         const threshold = 1.0 //document.getElementById('threshold').value;
+//
+//         if (analyserURL == '') {
+//             throw new Error('Enter an analyser endpoint url');
+//         }
+//         if (Object.keys(xmlSelected) == 0) {
+//             throw new Error('Select a metadata record to analyse');
+//         }
+//         if (threshold === '') {
+//             throw new Error('Select a threshold');
+//         }
+//
+//         document.getElementById('table-output').innerHTML = `<div class="progress"><div class="indeterminate"></div></div>`;
+//
+//         let response;
+//
+//         // Check for uploaded files
+//         if (files.length > 0) {
+//             // Prepare the FormData payload for file upload
+//             let formData = new FormData();
+//             formData.append('Methods', 'netcdf'); // Hardcoded to 'netcdf'
+//             formData.append('threshold', threshold);
+//
+//             // Append files to formData with unique doc IDs
+//             Array.from(files).forEach((file, index) => {
+//                 const guid = generateGUID();
+//                 formData.append(`file-${guid}`, file, file.name);
+//             });
+//
+//             // Send the data with files
+//             response = await fetch(analyserURL, {
+//                 method: 'POST',
+//                 body: formData // Sending FormData
+//             });
+//         } else {
+//             // Use the existing logic if no files are uploaded
+//             const payload = {
+//                 xml: xmlSelected, // Assuming xmlSelected is defined elsewhere
+//                 threshold: threshold
+//             };
+//
+//             response = await fetch(analyserURL, {
+//                 method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json'
+//                 },
+//                 body: JSON.stringify(payload)
+//             });
+//         }
+//
+//         const data = await response.json();
+//
+//         displayTermsNotFound(data);
+//         displayTable(data);
+//
+//     } catch (ex) {
+//         document.getElementById('table-output').textContent = ex.message;
+//         console.log(ex);
+//     }
+// };
+
+function generateGUID() {
+    // Simple GUID generator - you can replace it with a more robust version
+    return 'xxxx-xxxx-xxxx-xxxx'.replace(/[x]/g, function (c) {
+        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
 
 String.prototype.hashCode = function () {
     var hash = 0,
@@ -622,7 +726,7 @@ const init = async () => {
     const endpointParam = urlParams.get('endpoint');
     if (endpointParam) {
         document.getElementById('endpoint').value = endpointParam;
-        await buildConfigOptions();
+        await buildConfigOptions('metadata');
     }
     const earthPortalAPIKeyParam = urlParams.get('epapikey');
     if (earthPortalAPIKeyParam) {
@@ -683,5 +787,20 @@ const init = async () => {
     }
 };
 
-
 init()
+
+document.addEventListener('DOMContentLoaded', function () {
+    var tabsElement = document.querySelector('.tabs');
+    var tabsInstance = M.Tabs.init(tabsElement, {});
+    const uploadForm = document.getElementById('netcdf').querySelector('form');
+    uploadForm.addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent the default form submission
+        handleFileUpload(); // Call a function to handle the file upload
+    });
+});
+
+function handleFileUpload() {
+    const files = document.getElementById('fileUpload').files;
+    // Proceed with file upload logic (similar to what you have in the analyser function)
+    // ...
+}
