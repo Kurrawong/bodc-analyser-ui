@@ -475,7 +475,9 @@ function displayTable(responseData) {
                 return value; // return the value to be displayed in the
             };
             const tableId = `tbl_${(documentKey + methodKey).hashCode()}`;
-            // const table = new Tabulator("#tbl_" + key.hashCode(), {
+
+            const groupOrder = ["URI Match", "Exact Match", "Proximity Match", "Wildcard Match"]; // Define your custom order
+
             const table = new Tabulator(`#${tableId}`, {
                 data: data,
                 columns: [...metadataElementColumns, ...otherColumns],
@@ -486,6 +488,7 @@ function displayTable(responseData) {
                         return data.ContainerLabel ? data.ContainerLabel.value : "Unknown";
                     }
                 ],
+                groupValues: [false, groupOrder, false], // Define the order of the groups
                 groupHeader: function (value, count, data, group) {
                     const field = group.getField();
                     const tooltips = {
