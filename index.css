@@ -253,3 +253,7 @@ table.popup-table .tbl-value {
     user-select: none;
     font-weight: bold;
 }
+
+#data-source-tabs .tabs a {
+    font-size: 12px;
+}

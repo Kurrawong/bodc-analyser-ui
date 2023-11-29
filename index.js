@@ -1,4 +1,5 @@
 const useSampleFile = ''
+var activeTabId = '#metadata';
 
 // const useSampleFile = './2023-10-03_sample_response.json'
 
@@ -144,22 +145,23 @@ const buildConfigOptions = async () => {
             str += `<div><b>${optionName}</b></div>`;
             Object.keys(option).forEach(subOptionName => {
                 const subOption = option[subOptionName];
-                str += `<div>${subOptionName}</div>`;
-                Object.keys(subOption).forEach(method => {
-                    const methodLabel = subOption[method];
-                    // No method is pre-checked
-                    str += `
+                if (subOptionName === activeTabId.replace('#', '')) {
+                    Object.keys(subOption).forEach(method => {
+                        const methodLabel = subOption[method];
+                        str += `
                         <label>
                             <input
                                 class="filled-in"
                                 data-parent="${optionName}"
                                 value="${method}"
                                 type="checkbox"
+                                checked="checked"
                                 data-group="config-options"
                                 />
                             <span>${methodLabel}</span>
                         </label>`;
-                });
+                    });
+                }
             });
         } else {
             // For other options like 'Restrict to Themes'
@@ -184,7 +186,7 @@ const buildConfigOptions = async () => {
 };
 
 // Call this function initially and whenever the active tab changes
-buildConfigOptions('metadata');
+buildConfigOptions();
 
 const getConfig = () => {
     const optionsContainer = document.getElementById('config-options');
@@ -227,9 +229,7 @@ const analyser = async () => {
         if (analyserURL == '') {
             throw new Error('Enter an analyser endpoint url');
         }
-        if (Object.keys(xmlSelected) == 0) {
-            throw new Error('Select a metadata record to analyse');
-        }
+
         if (threshold == '') {
             throw new Error('Select a threshold');
         }
@@ -243,18 +243,41 @@ const analyser = async () => {
         document.getElementById('table-output').innerHTML = `<div class="progress"><div class="indeterminate"></div></div>`;
 
         let response;
-        if (useSampleFile != '') {
-            response = await fetch(useSampleFile, {method: 'GET'});
-        } else {
+        if (activeTabId === "#netcdf") {
+            // Prepare the FormData payload for file upload
+            let formData = new FormData();
+            formData.append('Methods', 'netcdf'); // Hardcoded to 'netcdf'
+            formData.append('threshold', threshold); // Ensure 'threshold' is defined and accessible
+
+            // Append files from uploadedFiles to formData with unique doc IDs
+            uploadedFiles.forEach((file) => {
+                // const guid = generateGUID();
+                formData.append(file.name, file, file.name);
+            });
+
+            // Send the data with files
             response = await fetch(analyserURL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
+                body: formData // Sending FormData
             });
-        }
+            // Handle the response here
+        } else {
+            if (useSampleFile != '') {
+                response = await fetch(useSampleFile, {method: 'GET'});
+            } else {
+                if (Object.keys(xmlSelected) == 0) {
+                    throw new Error('Select a metadata record to analyse');
+                }
 
+                response = await fetch(analyserURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+            }
+        }
         const data = await response.json();
 
         displayTermsNotFound(data);
@@ -265,79 +288,6 @@ const analyser = async () => {
         console.log(ex);
     }
 };
-
-// const analyser = async () => {
-//     try {
-//
-//         const url = document.getElementById('endpoint').value;
-//         let configParams = getConfig(); // This fetches the common config parameters
-//
-//         const files = document.getElementById('fileUpload').files;
-//
-//         const analyserURL = `${url}/process-metadata${configParams}`;
-//         document.getElementById('currentFile')?.getAttribute('href');
-//
-//         const xmlfile = document.getElementById('currentFile')?.getAttribute('href');
-//         const threshold = 1.0 //document.getElementById('threshold').value;
-//
-//         if (analyserURL == '') {
-//             throw new Error('Enter an analyser endpoint url');
-//         }
-//         if (Object.keys(xmlSelected) == 0) {
-//             throw new Error('Select a metadata record to analyse');
-//         }
-//         if (threshold === '') {
-//             throw new Error('Select a threshold');
-//         }
-//
-//         document.getElementById('table-output').innerHTML = `<div class="progress"><div class="indeterminate"></div></div>`;
-//
-//         let response;
-//
-//         // Check for uploaded files
-//         if (files.length > 0) {
-//             // Prepare the FormData payload for file upload
-//             let formData = new FormData();
-//             formData.append('Methods', 'netcdf'); // Hardcoded to 'netcdf'
-//             formData.append('threshold', threshold);
-//
-//             // Append files to formData with unique doc IDs
-//             Array.from(files).forEach((file, index) => {
-//                 const guid = generateGUID();
-//                 formData.append(`file-${guid}`, file, file.name);
-//             });
-//
-//             // Send the data with files
-//             response = await fetch(analyserURL, {
-//                 method: 'POST',
-//                 body: formData // Sending FormData
-//             });
-//         } else {
-//             // Use the existing logic if no files are uploaded
-//             const payload = {
-//                 xml: xmlSelected, // Assuming xmlSelected is defined elsewhere
-//                 threshold: threshold
-//             };
-//
-//             response = await fetch(analyserURL, {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/json'
-//                 },
-//                 body: JSON.stringify(payload)
-//             });
-//         }
-//
-//         const data = await response.json();
-//
-//         displayTermsNotFound(data);
-//         displayTable(data);
-//
-//     } catch (ex) {
-//         document.getElementById('table-output').textContent = ex.message;
-//         console.log(ex);
-//     }
-// };
 
 function generateGUID() {
     // Simple GUID generator - you can replace it with a more robust version
@@ -364,16 +314,30 @@ function displayTable(responseData) {
     console.log("RESULTS", responseData);
 
     // Mapping each document key to a section with a header and a table.
-    document.getElementById('table-output').innerHTML = Object.keys(responseData).map(documentKey => {
+    const tableOutput = document.getElementById('table-output');
+
+    Object.keys(responseData).forEach(documentKey => {
         const documentData = responseData[documentKey];
-        return `<div>
-                    <h2>XML Document: <b>${documentKey in xmlMap ? xmlMap[documentKey] : documentKey}</b></h2>
-                    ${Object.keys(documentData).map(methodKey => `
-                        <h2>Analyser Method: <b>${methodKey}</b></h2>
-                        <div class="tbl" id="tbl_${(documentKey + methodKey).hashCode()}"></div>
-                    `).join('')}
-                </div>`;
-    }).join('');
+        const documentDiv = document.createElement('div');
+
+        const documentTitle = document.createElement('h2');
+        documentTitle.innerHTML = `Document: <b>${documentKey in xmlMap ? xmlMap[documentKey] : documentKey}</b>`;
+        documentDiv.appendChild(documentTitle);
+
+        Object.keys(documentData).forEach(methodKey => {
+            const methodTitle = document.createElement('h2');
+            methodTitle.innerHTML = `Analyser Method: <b>${methodKey}</b>`;
+            documentDiv.appendChild(methodTitle);
+
+            const methodDiv = document.createElement('div');
+            methodDiv.className = 'tbl';
+            methodDiv.id = `tbl_${(documentKey + methodKey).hashCode()}`;
+            documentDiv.appendChild(methodDiv);
+        });
+
+        tableOutput.appendChild(documentDiv);
+    });
+
 
     const columnsToHide = ["TargetElement", "MethodSubType", "Container", "ContainerLabel"];
 
@@ -561,12 +525,13 @@ function displayTable(responseData) {
 }
 
 function displayTermsNotFound(responseData) {
-    const termsNotFoundDiv = document.getElementById('terms-not-found');
+    const termsNotFoundDiv = document.getElementById('table-output');
     termsNotFoundDiv.innerHTML = ''; // Clear previous content
 
-    const header = document.createElement('h2');
-    header.textContent = 'Terms not found - search in BioPortal and EarthPortal';
-    termsNotFoundDiv.appendChild(header);
+    // Create a button element that will work as a header
+    const headerButton = document.createElement('button');
+    headerButton.textContent = 'Terms not found - search in BioPortal and EarthPortal';
+    headerButton.className = 'header-button'; // Add your button class for styling
 
     // Create a span element for the +/- icon
     const twistie = document.createElement('span');
@@ -574,19 +539,24 @@ function displayTermsNotFound(responseData) {
     twistie.textContent = '+';
     twistie.style.marginLeft = '10px'; // Space between text and icon
 
-    // Append the twistie to the header
-    header.appendChild(twistie);
+    // Append the twistie to the button
+    headerButton.appendChild(twistie);
 
-    header.addEventListener('click', function () {
-        collapsibleContainer.classList.toggle('active');
-        twistie.textContent = collapsibleContainer.classList.contains('active') ? '-' : '+';
-    });
+    // Append the button to the termsNotFoundDiv
+    termsNotFoundDiv.appendChild(headerButton);
 
     // Create a twistie (collapsible) container
     const collapsibleContainer = document.createElement('div');
     collapsibleContainer.className = 'collapsible-content';
 
+    // Append the collapsible container to termsNotFoundDiv
     termsNotFoundDiv.appendChild(collapsibleContainer);
+
+    // Event listener for the button click
+    headerButton.addEventListener('click', function () {
+        collapsibleContainer.classList.toggle('active');
+        twistie.textContent = collapsibleContainer.classList.contains('active') ? '-' : '+';
+    });
 
     for (const documentKey of Object.keys(responseData)) {
         const documentData = responseData[documentKey];
@@ -789,9 +759,11 @@ const init = async () => {
 
 init()
 
+var tabsInstance;
+
 document.addEventListener('DOMContentLoaded', function () {
     var tabsElement = document.querySelector('.tabs');
-    var tabsInstance = M.Tabs.init(tabsElement, {});
+    tabsInstance = M.Tabs.init(tabsElement, {});
     const uploadForm = document.getElementById('netcdf').querySelector('form');
     uploadForm.addEventListener('submit', function (event) {
         event.preventDefault(); // Prevent the default form submission
@@ -799,8 +771,29 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function () {
+        // Assuming the href attribute of the clicked tab's link contains the tab ID
+        activeTabId = this.querySelector('a').getAttribute('href');
+        console.log("Active tab changed to: ", activeTabId);
+        buildConfigOptions()
+    });
+});
+
+
+var uploadedFiles = [];
+
 function handleFileUpload() {
-    const files = document.getElementById('fileUpload').files;
-    // Proceed with file upload logic (similar to what you have in the analyser function)
-    // ...
+    const fileInput = document.getElementById('fileUpload');
+    uploadedFiles = Array.from(fileInput.files); // Store the uploaded files
+
+    // Show feedback message and spinner
+    document.getElementById('uploadFeedback').style.display = 'block';
+    document.getElementById('feedbackText').textContent = uploadedFiles.length + " file(s) uploaded";
+
+    // Optionally, hide the feedback after a delay
+    setTimeout(() => {
+        document.getElementById('uploadFeedback').style.display = 'none';
+    }, 3000); // Hide after 3 seconds
 }

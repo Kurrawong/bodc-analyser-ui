@@ -14,7 +14,8 @@
     <link rel="stylesheet" href="index.css"/>
     <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
     <!-- jquery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+            integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
     <script>
         const module = {};
     </script>
@@ -23,7 +24,7 @@
 <h1 id="title">British Oceanographic Data Centre</h1>
 <div class="main-container">
     <div class="row">
-        <div class="col s12">
+        <div class="col s12" id="data-source-tabs">
             <ul class="tabs">
                 <li class="tab col s6"><a class="active" href="#metadata">Metadata Sources</a></li>
                 <li class="tab col s6"><a href="#netcdf">Data Sources</a></li>
@@ -43,10 +44,14 @@
         </div>
         <div id="netcdf" class="sidebar">
             <form method="post" enctype="multipart/form-data">
-                <label for="fileUpload">Select a netCDF file to upload:</label><br>
+                <label for="fileUpload">Select one or more netCDF files to upload:</label><br>
                 <input type="file" id="fileUpload" name="files" multiple><br><br>
                 <input type="submit" value="Upload Files" name="submit">
             </form>
+            <div id="uploadFeedback" style="display:none;">
+                <div class="spinner"><!-- Spinner icon here --></div>
+                <p id="feedbackText"></p>
+            </div>
         </div>
     </div>
     <div id="xml">
@@ -84,12 +89,11 @@
                     </div>
                 </div>
                 <button type="button" id="analyse" class="btn">Analyse</button> &nbsp; <a style="display:none;"
-                                                                                                   id="alink" href="#"
-                                                                                                   target="_new">(view)</a>
+                                                                                          id="alink" href="#"
+                                                                                          target="_new">(view)</a>
             </form>
         </div>
         <p><b>Analyser output</b></p>
-        <div id="terms-not-found"></div>
         <div id="table-output"></div>
 
     </div>
