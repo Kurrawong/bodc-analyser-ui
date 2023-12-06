@@ -256,10 +256,25 @@ const analyser = async () => {
             });
 
             // Send the data with files
-            response = await fetch(analyserURL, {
-                method: 'POST',
-                body: formData // Sending FormData
-            });
+            try {
+                response = await fetch(analyserURL, {
+                    method: 'POST',
+                    body: formData // Sending FormData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+
+                // Handle successful upload here
+                console.log('File uploaded successfully');
+            } catch (error) {
+                console.error('Error during file upload:', error);
+            } finally {
+                // Stop the progress bar here
+                document.getElementById('progressBar').innerHTML = '';
+            }
+
             // Handle the response here
         } else {
             if (useSampleFile != '') {
@@ -326,7 +341,14 @@ function displayTable(responseData) {
 
         Object.keys(documentData).forEach(methodKey => {
             const methodTitle = document.createElement('h2');
-            methodTitle.innerHTML = `Analyser Method: <b>${methodKey}</b>`;
+            const methodData = documentData[methodKey];
+            const stats = methodData.stats;
+            let percentFound = 0;
+            if (stats && stats.found !== undefined && stats.total > 0) {
+                percentFound = (stats.found / stats.total) * 100;
+            }
+
+            methodTitle.innerHTML = `Analyser Method: <b>${methodKey}</b>. Total terms: ${stats.total}. Found: ${stats.found}. Percentage: ${percentFound.toFixed(0)}%`;
             documentDiv.appendChild(methodTitle);
 
             const methodDiv = document.createElement('div');
@@ -792,11 +814,19 @@ function handleFileUpload() {
     uploadedFiles = Array.from(fileInput.files); // Store the uploaded files
 
     // Show feedback message and spinner
-    document.getElementById('uploadFeedback').style.display = 'block';
-    document.getElementById('feedbackText').textContent = uploadedFiles.length + " file(s) uploaded";
+    const feedbackElement = document.getElementById('uploadFeedback');
+    const feedbackTextElement = document.getElementById('feedbackText');
+    const progressElement = document.getElementById('progressBar'); // Assuming this is your progress bar element
 
-    // Optionally, hide the feedback after a delay
+    feedbackElement.style.display = 'block';
+    feedbackTextElement.textContent = uploadedFiles.length + " file(s) uploaded";
+
+    // Show spinner or progress bar
+    progressElement.innerHTML = `<div class="progress"><div class="indeterminate"></div></div>`;
+
+    // Optionally, hide the feedback and progress bar after a delay
     setTimeout(() => {
-        document.getElementById('uploadFeedback').style.display = 'none';
-    }, 3000); // Hide after 3 seconds
+        feedbackElement.style.display = 'none';
+        progressElement.innerHTML = ''; // Clear the progress bar
+    }, 500); // Hide after 3 seconds
 }
